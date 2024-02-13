@@ -29,11 +29,12 @@ World::World(sf::RenderWindow& window, FontHolder& fonts) :
     m_player_creature(nullptr),
     // spawn player in the center of the world
     m_player_spawn_point(m_world_bounds.width / 2.f,
-            m_world_bounds.height / 2.f),
+            m_world_bounds.height / 2.f)
 
     // npcs fifth ->
-    m_npc_spawn_points(),
-    m_active_npcs()
+    /* Don't need npcs...
+     * m_npc_spawn_points(),
+     * m_active_npcs() */
 {
         load_textures();
         build_scene();
@@ -61,9 +62,10 @@ void World::update(sf::Time delta_time)
     /// entities).
     handle_collisions();
 
+    /** @remark UNUSED, no NPCs... */
     /// Remove all destroyed entities and create new ones.
-    m_scene_graph.removal();
-    spawn_npcs();
+    /* m_scene_graph.removal();
+    spawn_npcs(); */
 
     /// Regular game update step, adapt player position (correct even though
     /// outside view, because adapt_player_position() handles appropriately).
@@ -86,6 +88,10 @@ CommandQueue& World::get_command_queue()
     return m_command_queue;
 }
 
+/**
+ * Loads textures for the World.
+ * @remark Main fn that loads textures ... texture loading goes HERE.
+ */
 void World::load_textures()
 {
     m_textures.load(Textures::Grass, "textures/world/grass1.png");
@@ -127,8 +133,8 @@ void World::build_scene()
     m_player_creature->setPosition(m_player_spawn_point);
     m_scene_layers[Foreground]->attach_child(std::move(player));
 
-    /// Add NPCs to the scene.
-    add_npcs();
+    /** No NPCs... */
+    //add_npcs();
 }
 
 void World::adapt_player_position()
@@ -183,6 +189,7 @@ void World::adapt_player_velocity()
 }
 
 /**
+ * @warning UNUSED, but implemented.
  * Spawns NPCs from m_npc_spawn_points.
  * @see add_npcs().
  * @note Assumes m_npc_spawn_points is sorted in ascending order. Iterating
@@ -255,6 +262,7 @@ void World::spawn_npcs()
 }
 
 /**
+ * @warning UNUSED, but implemented.
  * Adds ONE NPC at a time to m_npc_spawn_points.
  * @param Creature::Type type
  * The type of the Creature to be added.
@@ -278,6 +286,7 @@ void World::add_npc(Creature::Type type, sf::Vector2f& vec2_rel)
 }
 
 /**
+ * @warning UNUSED, but implemented.
  * Adds ALL NPCs to be spawned to m_npc_spawn_points.
  * @note Uses add_npc() abstraction to add NPCs to m_npc_spawn_points.
  * @see add_npc().

@@ -1,8 +1,8 @@
 /**
- * @project untitled game
+ * @project occ accessibility tour
  * @copyright See LICENSE in the top level directory
  * @file data_tables.h
- * @developers agge3
+ * @author agge3, kpowkitty
  */
 
 #pragma once
