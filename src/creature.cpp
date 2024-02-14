@@ -82,12 +82,6 @@ std::ostream& operator<<(std::ostream& out, const Creature::Type type)
     case Creature::Type::Player:
         out << "Player";
         break;
-    case Creature::Type::Bunny:
-        out << "Bunny";
-        break;
-    case Creature::Type::Bear:
-        out << "Bear";
-        break;
     case Creature::Type::TypeCount:
         out << std::to_string(Creature::Type::TypeCount);
         break;
@@ -178,10 +172,6 @@ Textures::ID to_texture_id(Creature::Type type)
     switch (type) {
     case Creature::Player:
         return Textures::Player;
-    case Creature::Bunny:
-        return Textures::Bunny;
-    case Creature::Bear:
-        return Textures::Bear;
     }
     // If Texture not found, default Texture is Textures::Player
     return Textures::Player;
@@ -235,6 +225,15 @@ void Creature::update_texts()
     m_health_display->setRotation(-getRotation());
 }
 
+/**
+ * @warning UNUSED.
+ * Checks if projectile is queued to launch and forwards Command to
+ * CommandQueue.
+ * @param sf::Time dt
+ * Delta time as sf::Time
+ * @param CommandQueue& commands
+ * Command(s) to be forwarded to CommandQueue
+ */
 void Creature::check_projectile_launch(sf::Time delta_time,
         CommandQueue& commands)
 {
@@ -304,6 +303,7 @@ float Creature::get_max_speed() const
 }
 
 /**
+ * @warning UNUSED, m_is_attacking indefinitely set to FALSE.
  * Sets m_is_attacking to true (to attack).
  * @note Only Creature(s) with an attack_interval that isn't zero are able to
  * attack.
@@ -313,6 +313,8 @@ void Creature::attack()
     // guard to make sure attack_interval != 0
     if (TABLE[m_type].attack_interval != sf::Time::Zero)
         m_is_attacking = true;
+    // make unsuable, always set m_is_attacking to FALSE on every call...
+    m_is_attacking = false;
 }
 
 void Creature::create_pickup(SceneNode& node, const TextureHolder& textures)

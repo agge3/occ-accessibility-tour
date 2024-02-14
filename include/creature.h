@@ -19,8 +19,6 @@ public:
      */
     enum Type : unsigned int {
         Player,
-        Bunny,
-        Bear,
         TypeCount,
     };
 

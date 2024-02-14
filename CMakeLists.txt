@@ -20,7 +20,7 @@ if(TARGET_SYSTEM_WIN32)
 endif()
 
 # project name, description, & lang
-project(untitled-game
+project(occ-accessibility-tour
     DESCRIPTION "It's an untitled game"
     LANGUAGES CXX)
 # set version numbers
@@ -29,7 +29,7 @@ set(VERSION_MINOR 1)
 set(VERSION_PATCH 0)
 
 # declare exe
-add_executable(untitled-game)
+add_executable(occ-accessibility-tour)
 add_executable(testing)
 #add_library(imgui-sfml)
 
@@ -44,7 +44,7 @@ target_sources(testing PRIVATE src/testing.cpp
     )
 
 # add src files to target
-target_sources(untitled-game PRIVATE src/main.cpp
+target_sources(occ-accessibility-tour PRIVATE src/main.cpp
     src/utility.cpp
     src/debug.cpp
     src/app.cpp
@@ -110,15 +110,15 @@ target_sources(imgui-sfml PUBLIC
 # link sfml static lib
 #set(SFML_STATIC_LIBRARIES TRUE)
 if(TARGET_SYSTEM_LINUX)
-    target_include_directories(untitled-game PRIVATE
+    target_include_directories(occ-accessibility-tour PRIVATE
         "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/include/")
-    target_link_directories(untitled-game PRIVATE
+    target_link_directories(occ-accessibility-tour PRIVATE
         "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/lib/")
     set(SFML_DIR "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/lib/cmake/SFML")
 elseif(TARGET_SYSTEM_WIN32)
-    target_include_directories(untitled-game PRIVATE
+    target_include_directories(occ-accessibility-tour PRIVATE
         "${CMAKE_SOURCE_DIR}/dep/SFML-2.6.1/include/")
-    target_link_directories(untitled-game PRIVATE
+    target_link_directories(occ-accessibility-tour PRIVATE
         "${CMAKE_SOURCE_DIR}/dep/SFML-2.6.1/lib/")
     set(SFML_DIR "${CMAKE_SOURCE_DIR}/dep/SFML-2.6.1/lib/cmake/SFML")
 endif()
@@ -126,11 +126,11 @@ endif()
 find_package(SFML COMPONENTS network graphics window system REQUIRED)
 
 # link dependencies (imgui & imgui-sfml)
-target_include_directories(untitled-game PRIVATE
+target_include_directories(occ-accessibility-tour PRIVATE
     "${CMAKE_SOURCE_DIR}/dep/imgui/")
-target_include_directories(untitled-game PRIVATE
+target_include_directories(occ-accessibility-tour PRIVATE
     "${CMAKE_SOURCE_DIR}/dep/imgui-sfml")
-#target_link_directories(untitled-game PRIVATE
+#target_link_directories(occ-accessibility-tour PRIVATE
 #    "${CMAKE_SOURCE_DIR}/dep/imgui-sfml/lib")
 
 # link sfml static lib
@@ -181,7 +181,7 @@ target_link_libraries(imgui-sfml PUBLIC
 #    "/usr/lib/")
 #target_include_directories(testing PRIVATE
 #    "/usr/include/GL")
-target_link_libraries(untitled-game PRIVATE
+target_link_libraries(occ-accessibility-tour PRIVATE
     #sfml-audio-s
     #openal32
     #flac
@@ -206,25 +206,25 @@ target_link_libraries(untitled-game PRIVATE
     )
 
 # target include/.h
-target_include_directories(untitled-game PRIVATE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(occ-accessibility-tour PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 # target features & options
-target_compile_features(untitled-game PRIVATE cxx_std_20)
+target_compile_features(occ-accessibility-tour PRIVATE cxx_std_20)
 # m_contextdebug and release g++ flags
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall")
 #set(CMAKE_CXX_FLAGS_RELEASE_INIT "-Wall")
 
 # copy res/lib/dep into build dir, for exec root access
-add_custom_command(TARGET untitled-game PRE_BUILD
+add_custom_command(TARGET occ-accessibility-tour PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/res/ $<TARGET_FILE_DIR:untitled-game>)
-add_custom_command(TARGET untitled-game PRE_BUILD
+        ${CMAKE_SOURCE_DIR}/res/ $<TARGET_FILE_DIR:occ-accessibility-tour>)
+add_custom_command(TARGET occ-accessibility-tour PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/lib/ $<TARGET_FILE_DIR:untitled-game>)
+        ${CMAKE_SOURCE_DIR}/lib/ $<TARGET_FILE_DIR:occ-accessibility-tour>)
 # copy scripts into build dir
-add_custom_command(TARGET untitled-game PRE_BUILD
+add_custom_command(TARGET occ-accessibility-tour PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/scripts/ $<TARGET_FILE_DIR:untitled-game>)
+        ${CMAKE_SOURCE_DIR}/scripts/ $<TARGET_FILE_DIR:occ-accessibility-tour>)
 
 # build doc with doxygen
 # to only build doc for release mode...
