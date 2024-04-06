@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22...3.27)
 # project name, description, & lang
 project(voice
     DESCRIPTION "It's a voice"
-    LANGUAGES C)
+    LANGUAGES CXX)
 # set version numbers
 set(VERSION_MAJOR 0)
 set(VERSION_MINOR 1)
@@ -13,7 +13,10 @@ set(VERSION_PATCH 0)
 # declare exe
 add_executable(voice)
 
-target_sources(voice PRIVATE src/main.c)
+target_sources(voice PRIVATE src/stt.cpp)
+
+target_include_directories(voice PRIVATE
+    "${CMAKE_SOURCE_DIR}/include/")
 
 target_include_directories(voice PRIVATE
     "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/include/")

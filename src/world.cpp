@@ -149,31 +149,33 @@ void World::adapt_player_position()
     /// Initialize position to player position.
 	sf::Vector2f position = m_player_creature->getPosition();
 
-	// pos.x = pos.x || (0x + border_dist, y), if pos.x <= pan neg to the left
-    // on the x-axis
+	/** @brief If player is on the left side of the view bounds... */
     if (position.x = std::max(position.x, view_bounds.left + border_distance),
             position.x <= view_bounds.left + border_distance)
-        // pan half distance of view bounds (world view)
-        m_world_view.move(-(view_bounds.width / 2), 0.f);
-    // (WIDTHx - border_dist, y), if pos.x >= pan pos to the right on the x-asis
+        /** @brief ...Change view scene to west scene. */
+
+    /** @brief If player is on the right side of the view bounds... */
     if (position.x = std::min(position.x,
             view_bounds.left + view_bounds.width - border_distance),
             position.x >= view_bounds.left + view_bounds.width - border_distance)
-        m_world_view.move(view_bounds.width / 2, 0.f);
-    // same as x-axis, for y-axis
+        /** @brief ...Change view scene to east scene. */
+
+    /** @brief If player is on the top side of the view bounds... */
     if (position.y = std::max(position.y, view_bounds.top + border_distance),
             position.y <= view_bounds.top + border_distance)
-        m_world_view.move(0.f, -(view_bounds.height / 2));
+        /** @brief ...Change view scene to north scene. */
+
+    /** @brief If player is on the bottom side of the view bounds... */
 	if (position.y = std::min(position.y,
             view_bounds.top + view_bounds.height - border_distance),
             position.y >= view_bounds.top + view_bounds.height - border_distance)
-        m_world_view.move(0.f, view_bounds.height / 2);
+        /** @brief ...Change view scene to south scene. */
 
     /// Set player position to current position.
 	m_player_creature->setPosition(position);
 
     // uncomment to print current player pos
-    std::cout << "Player position: (" << position.x << ", " << position.y << ")\n";
+    //std::cout << "Player position: (" << position.x << ", " << position.y << ")\n";
 }
 
 void World::adapt_player_velocity()
