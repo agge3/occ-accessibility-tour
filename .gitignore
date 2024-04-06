@@ -3,3 +3,6 @@ debug
 bin
 dep/SFML-2.6.1
 modules
+voice/dep/DeepSpeech
+voice/dep/deepspeech-models/deepspeech-0.9.3-models.pbmm
+voice/dep/deepspeech-models/deepspeech-0.9.3-models.scorer
