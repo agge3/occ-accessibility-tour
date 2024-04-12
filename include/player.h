@@ -52,6 +52,8 @@ public:
     void handle_event(const sf::Event& event, CommandQueue& commands);
     // for real-time input
     void handle_realtime_input(CommandQueue& commands);
+    // for local voice lib
+    void handle_voice_input(CommandQueue& commands);
     // fn to bind keys and get assigned keys
     void assign_key(Action action, sf::Keyboard::Key key);
     sf::Keyboard::Key get_assigned_key(Action action) const;
@@ -65,15 +67,23 @@ private:
 
     /**
      * @var std::map<sf::Keyboard::Key, Action> m_keybinding
-     * Key to bind to action.
+     * Key to bind to Action.
      * @note Store the keys and actions in map together instead of as seperate
      * variables.
      */
     std::map<sf::Keyboard::Key, Action> m_keybinding;
+    
+    /**
+     * @var std::map<stt::Input::Key, Action> _sttbinding
+     * SpeechToText Key to bind to Action.
+     * @note Store the keys and actions in map together instead of as seperate
+     * variables.
+     */
+    std::map<stt::Input::Key, Action> _sttbinding;
 
     /**
      * @var std::map<Action, Command> m_actionbinding
-     * Action to bind to command.
+     * Action to bind to Command.
      * @note Store the actions and commands in a map together instead of as
      * seperate variables.
      */
@@ -81,7 +91,7 @@ private:
 
     /**
      * @var LevelStatus m_current_level_status
-     * Holds current level status of Player.
+     * Holds current LevelStatus of Player.
      */
     LevelStatus m_current_level_status;
 };

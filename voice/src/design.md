@@ -11,3 +11,11 @@ PARSER: when hits keyword hook forwards it as a cmd
 
 * clean interface, should map to easily callable binds
 * just focus on up,down,left,right
+
+
+
+
+# RECORDING
+sf::SoundRecorder -> records audio (usually sends to a buffer, DS wants a buf!)
+
+sf::SoundRecorderBuffer -> what we're looking for, proc for DS

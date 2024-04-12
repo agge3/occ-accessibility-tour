@@ -218,9 +218,6 @@ set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall")
 add_custom_command(TARGET occ-accessibility-tour PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/res/ $<TARGET_FILE_DIR:occ-accessibility-tour>)
-add_custom_command(TARGET occ-accessibility-tour PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/lib/ $<TARGET_FILE_DIR:occ-accessibility-tour>)
 # copy scripts into build dir
 add_custom_command(TARGET occ-accessibility-tour PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

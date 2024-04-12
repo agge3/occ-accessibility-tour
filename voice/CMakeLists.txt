@@ -13,16 +13,16 @@ set(VERSION_PATCH 0)
 # declare exe
 add_executable(voice)
 
-target_sources(voice PRIVATE src/stt.cpp)
+target_sources(voice PRIVATE src/stream.cpp)
 
 target_include_directories(voice PRIVATE
     "${CMAKE_SOURCE_DIR}/include/")
 
 target_include_directories(voice PRIVATE
-    "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/include/")
+    "../dep/linux/SFML-2.6.1/include/")
 target_link_directories(voice PRIVATE
-    "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/lib/")
-set(SFML_DIR "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/lib/cmake/SFML")
+    "../dep/linux/SFML-2.6.1/lib/")
+set(SFML_DIR "../dep/linux/SFML-2.6.1/lib/cmake/SFML")
 
 
 target_include_directories(voice PRIVATE
@@ -37,6 +37,7 @@ target_link_libraries(voice PRIVATE
     sfml-graphics
     sfml-window
     sfml-system
+    sfml-audio
     OpenGL
     GL
     deepspeech

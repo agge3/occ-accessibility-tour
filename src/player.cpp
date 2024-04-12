@@ -83,6 +83,18 @@ void Player::handle_realtime_input(CommandQueue& commands)
     }
 }
 
+void Player::handle_voice_input(CommandQueue& commands)
+{
+    for (auto pair : _sttbinding) {
+        if (stt::Key::is_key_pressed(pair.first)
+            && is_realtime_action(pair.second)) {
+         // print detection of stt input
+         std::cout << "Speech to text input detected!\n"
+         commands.push(m_actionbinding[pair.second]);
+         }
+    }
+}
+
 void Player::assign_key(Action action, sf::Keyboard::Key key)
 {
     // remove all keys that already map to action
