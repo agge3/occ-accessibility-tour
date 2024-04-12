@@ -72,7 +72,7 @@ private:
      * variables.
      */
     std::map<sf::Keyboard::Key, Action> m_keybinding;
-    
+
     /**
      * @var std::map<stt::Input::Key, Action> _sttbinding
      * SpeechToText Key to bind to Action.

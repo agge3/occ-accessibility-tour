@@ -1,5 +1,7 @@
 #pragma once
 
+#include <queue>
+
 namespace stt {
 
 class Input {
@@ -26,7 +28,8 @@ public:
     static bool is_key_pressed(Key key);
     static bool is_key_pressed(Scancode code);
 private:
-    SpeechToText stt;
+    SpeechToText _stt;
+    std::queue _keyqueue;
 };
 
 }

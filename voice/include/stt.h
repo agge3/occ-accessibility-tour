@@ -2,10 +2,10 @@
 
 struct AudioBuffer {
     unsigned int channels;
-    short samples[];
+    const short* samples;
     unsigned int count;
 };
-    
+
 class SpeechToText {
 public:
     enum class Channels : unsigned int {
@@ -15,7 +15,7 @@ public:
     SpeechToText();
     void run();
 private:
-    Buffer record();
+    AudioBuffer record();
     std::string decode(const Buffer& buf);
     std::string parse(std::string decoded);
     ModelState* _ctx;
@@ -23,4 +23,5 @@ private:
     char* _mpath;
     char* _spath;
     int _sample_rate;
-}; 
+    AudioBuffer _buf;
+};

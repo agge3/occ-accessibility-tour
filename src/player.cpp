@@ -86,7 +86,7 @@ void Player::handle_realtime_input(CommandQueue& commands)
 void Player::handle_voice_input(CommandQueue& commands)
 {
     for (auto pair : _sttbinding) {
-        if (stt::Key::is_key_pressed(pair.first)
+        if (stt::Input::is_key_pressed(pair.first)
             && is_realtime_action(pair.second)) {
          // print detection of stt input
          std::cout << "Speech to text input detected!\n"

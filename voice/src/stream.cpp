@@ -37,15 +37,15 @@ enum class Channels : unsigned int {
 /** @note 16-bit, mono raw audio signal, SAMPLE RATE IS 16000. */
 
 int main() {
-    // init ds 
+    // init ds
     ModelState* ctx;
 
     // model & scorer path
-    static const char mpath[] = 
+    static const char mpath[] =
         "../dep/deepspeech-models/deepspeech-0.9.3-models.pbmm";
-    static const char spath[] = 
+    static const char spath[] =
         "../dep/deepspeech-models/deepspeech-0.9.3-models.scorer";
-    
+
     int status = DS_CreateModel(mpath, &ctx);
     if (status != 0) {
         char* error = DS_ErrorCodeToErrorMessage(status);
@@ -55,8 +55,8 @@ int main() {
     }
 
     // model's created
-    
-    // TODO: beamwidth? 
+
+    // TODO: beamwidth?
 
     // now scorer
 
@@ -71,7 +71,7 @@ int main() {
     if (!sf::SoundBufferRecorder::isAvailable()) {
         std::cerr << "Audio capture is not available on this system.\n";
     }
-    
+
     // create the recorder
     sf::SoundBufferRecorder recorder;
 
@@ -82,7 +82,7 @@ int main() {
 
     StreamingState* sctx = NULL;
     status = DS_CreateStream(ctx, &sctx);
-    if (status != 0) {       
+    if (status != 0) {
         char* error = DS_ErrorCodeToErrorMessage(status);
         fprintf(stderr, "Could not create stream: %s\n", error);
         return 1;
@@ -110,24 +110,24 @@ int main() {
     #if defined(__GNUC__) || defined(__GNUG__)
         #pragma GCC diagnostic pop
     #endif
-     
+
     // start the capture
     // NOTE: start(sampleRate = 44100), overwrite default to 16000 for DS
     std::cout << "Start recording\n";
     recorder.start(16000);
-    
+
     // probably want some kind of set interval, not ideal, but workable
-    // ...a better solution is overlapping and catting buffers, or having an 
-    // active buffer that is stream ... DS needs a buf though ... so not sure 
+    // ...a better solution is overlapping and catting buffers, or having an
+    // active buffer that is stream ... DS needs a buf though ... so not sure
     // (?)
-    
+
     // xxx need to decide on correct buf interval
     sleep(1);
 
     // stop the capture
     recorder.stop();
-    std::cout << "End recording\n";    
-    
+    std::cout << "End recording\n";
+
     // retrieve the buffer that contains the captured audio data
     const sf::SoundBuffer& buffer = recorder.getBuffer();
 
@@ -138,10 +138,10 @@ int main() {
 
     // is std::size_t
     unsigned int count = static_cast<unsigned int>(buffer.getSampleCount());
-    
+
     // feed audio stream to DS and intermediate decode as streamed
     // opaque ptr, if NULL error has occured -> pass to DS_CreateStream()
-   
+
     std::cout << "Start decoding\n";
     char* stt = DS_SpeechToText(ctx, samples, count);
     std::cout << "End decoding\n";
@@ -160,7 +160,7 @@ int main() {
     //if (found == std::string::npos) {
     //    std::cout << "No keys found this buffer!\n";
     //}
-    
+
     /** @brief Parse CXX string for key inputs. */
     std::istringstream in(stt_cpp);
     std::string parse;
@@ -190,20 +190,20 @@ int main() {
         // starting at 11 idx
         bitstring += 2^(i+11);
     }
-    
+
     // print key presses to confirm parser is working correctly
     std::cout << "Up: " << up << "\nDown: " << down << "\nLeft:" << left
         << "\nRight: " << right << "\n";
 
-    // end decoding EARLY, have already decoded on-the-fly, avoid costly final 
+    // end decoding EARLY, have already decoded on-the-fly, avoid costly final
     // decode
     DS_FreeStream(sctx);
 
-    // ctx (local), short int 
+    // ctx (local), short int
     //DS_SpeechToText(ctx, abuf, asize);
     // need to DS_FreeString from mem
     // is going to ret char*
-    
+
     DS_FreeModel(ctx);
     return 0;
 }
@@ -238,7 +238,7 @@ stt::Input::Key to_key(uint8_t bitstring, int count) {
     default:
         break;
     }
-    
+
     unsigned int up_presses = static_cast<unsigned int>(bitstring | up);
     unsigned int down_presses = static_cast<unsigned int>(bitstring | down);
     unsigned int left_presses = static_cast<unsigned int>(bitstring | left);
