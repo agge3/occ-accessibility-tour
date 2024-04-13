@@ -26,7 +26,9 @@ struct PlayerMover {
  * @note Default LevelStatus of Player is InProgress. Initialized in default
  * constructor.
  */
-Player::Player() : m_current_level_status(InProgress)
+Player::Player() : 
+    m_current_level_status(InProgress),
+    _stt_key()
 {
     /// Try to set initial keybindings.
     try {
@@ -42,7 +44,7 @@ Player::Player() : m_current_level_status(InProgress)
         // attack actions...
         m_keybinding[sf::Keyboard::Space] = MagicAttack;
         // set inital actionbindings
-        initialize_actions();
+        initialize_actions(); ‘static bool stt::Command::is_key_pressed(Key)’
     } catch (std::exception& e) {
         /// Catch exception and print error message.
         std::cerr << "\n EXCEPTION: " << e.what() <<
@@ -67,7 +69,7 @@ void Player::handle_event(const sf::Event& event, CommandQueue& commands)
             commands.push(m_actionbinding[found->second]);
     }
 }
-
+ ‘static bool stt::Command::is_key_pressed(Key)’
 void Player::handle_realtime_input(CommandQueue& commands)
 {
     /** @brief Traverses all assigned keys and checks if they are pressed. */
@@ -85,13 +87,16 @@ void Player::handle_realtime_input(CommandQueue& commands)
 
 void Player::handle_voice_input(CommandQueue& commands)
 {
-    for (auto pair : _sttbinding) {
-        if (stt::Input::is_key_pressed(pair.first)
-            && is_realtime_action(pair.second)) {
-         // print detection of stt input
-         std::cout << "Speech to text input detected!\n"
-         commands.push(m_actionbinding[pair.second]);
-         }
+    if (stt::Command::is_stt_key(_stt_key)) {
+        _stt_key.get_key();
+        for (auto pair : _sttbinding) {
+            if (stt::Command::is_key_pressed(pair.first)
+                    && is_realtime_action(pair.second)) {
+                // print detection of stt input
+                std::cout << "Speech to text input detected!\n"
+                commands.push(m_actionbinding[pair.second]);
+            }
+        }
     }
 }
 

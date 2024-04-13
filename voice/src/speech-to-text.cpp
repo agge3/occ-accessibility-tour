@@ -4,15 +4,13 @@
  * Date: February 2024
  */
 
-#include <deepspeech.h>
-#include <SFML/Audio/SoundBufferRecorder.hpp>
+#include "speech-to-text.h"
 
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 
-#include <assert.h>
 #include <errno.h>
 #include <math.h>
 #include <string.h>
@@ -20,24 +18,24 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <sstream>
-#include <string>
 #include <vector>
 #include <iostream>
-#include <assert>
+#include <cassert>
 
 static const char MODEL_PATH[] =
     "../dep/deepspeech-models/deepspeech-0.9.3-models.pbmm";
 static const char SCORER_PATH[] =
     "../dep/deepspeech-models/deepspeech-0.9.3-models.scorer";
 
-SpeechToText::SpeechToText() :
+stt::SpeechToText::SpeechToText() :
     _mpath(MODEL_PATH),
     _spath(SCORER_PATH),
     _ctx(),
     _sctx(),
     _sample_rate(16000),
-    _buf()
+    _buf(),
+    _decoded(), // xxx std::optional to handle empty string instantiation (?)
+    _recorder()
 {
     /** @brief Instantiate AudioBuffer.
      * @note Only channels are known (Channels::Mono), sf::SoundBuffer will
@@ -45,36 +43,35 @@ SpeechToText::SpeechToText() :
     _buf.channels = static_cast<unsigned int>(Channels::Mono);
 
     /** @brief Create DeepSpeech model with model path and model context. */
-    int status = DS_CreateModel(mpath, &ctx);
+    int status = DS_CreateModel(_mpath, &_ctx);
     if (status != 0) {
         char* error = DS_ErrorCodeToErrorMessage(status);
         fprintf(stderr, "Could not create model: %s\n", error);
         free(error);
-        return 1;
+        // xxx need to try-catch block (?), might not work - or init in init()
+        //return 1;
     }
 
     /** @brief Add DeepSpeech scorer to model context. */
-    status = DS_EnableExternalScorer(ctx, spath);
+    status = DS_EnableExternalScorer(_ctx, _spath);
     if (status != 0) {
         fprintf(stderr, "Could not enable external scorer.\n");
-        return 1;
+        // xxx need to try-catch block (?), might not work - or init in init()
+        //return 1;
     }
 
     // _sample_rate is used to set SFML sample rate, needs to match DS
     // sample rate
-    assert(DS_GetModelSampleRate(ctx) == _sample_rate);
+    assert(DS_GetModelSampleRate(_ctx) == _sample_rate);
 
     // first check if an input audio device is available on the system
     if (!sf::SoundBufferRecorder::isAvailable()) {
         std::cerr << "Audio capture is not available on this system.\n";
     }
 
-    // create the recorder
-    sf::SoundBufferRecorder recorder;
-
     // xxx static_cast? what's the point of the enum, sort out better
     // (SEE: struct AudioBuffer instantiation)
-    recorder.setChannelCount(buffer.channels);
+    _recorder.setChannelCount(_buf.channels);
 
     /** @brief This should be addressed... */
     #if defined(__GNUC__) || defined(__GNUG__)
@@ -84,11 +81,11 @@ SpeechToText::SpeechToText() :
 
     std::vector<char*> hotwords = {"up", "down", "left", "right"};
     for (int i = 0; i < hotwords.size(); ++i) {
-        DS_AddHotWord(ctx, hotwords.at(0), 9.f);
+        DS_AddHotWord(_ctx, hotwords.at(0), 9.f);
     }
     std::vector<char*> coldwords = {"but", "at", "he", "ah", "the", "put", "bu"};
     for (int i = 0; i < coldwords.size(); ++i) {
-        DS_AddHotWord(ctx, coldwords.at(0), -75.f);
+        DS_AddHotWord(_ctx, coldwords.at(0), -75.f);
     }
 
     #if defined(__GNUC__) || defined(__GNUG__)
@@ -96,11 +93,13 @@ SpeechToText::SpeechToText() :
     #endif
 }
 
-void SpeechToText::run()
+/**
+ * Public run method to run SpeechToText.
+ */
+void stt::SpeechToText::run()
 {
     record();
     decode();
-    parse();
 }
 
 /**
@@ -108,11 +107,11 @@ void SpeechToText::run()
  * @note Runs on a new thread, decode() and parse() DOES NOT.
  * @todo Threading should be addressed.
  */
-void SpeechToText::record() {
+void stt::SpeechToText::record() {
     // start the capture
     // NOTE: start(sampleRate = 44100), overwrite default to 16000 for DS
     std::cout << "Start recording\n";
-    recorder.start(16000);
+    _recorder.start(16000);
 
     // probably want some kind of set interval, not ideal, but workable
     // ...a better solution is overlapping and catting buffers, or having an
@@ -123,58 +122,52 @@ void SpeechToText::record() {
     sleep(1);
 
     // stop the capture
-    recorder.stop();
+    _recorder.stop();
     std::cout << "End recording\n";
 
     // retrieve the buffer that contains the captured audio data
-    const sf::SoundBuffer& buffer = recorder.getBuffer();
+    const sf::SoundBuffer& buf = _recorder.getBuffer();
 
     // need raw audio data
     // is vector<sf::Int16>
     // xxx convert sf::Int16 to short and std::vector to array - OK?
-    _buf.samples = static_cast<const short*>(buffer.getSamples());
+    _buf.samples = static_cast<const short*>(buf.getSamples());
 
     // is std::size_t
-    _buf.count = static_cast<unsigned int>(buffer.getSampleCount());
+    _buf.count = static_cast<unsigned int>(buf.getSampleCount());
 
     /** @brief AudioBuffer is fully instantiated, SAFE to proceed
      * @note Each call of record() will overwrite AudioBuffer with a new
      * sf::AudioBuffer. */
 }
 
-std::string SpeechToText::decode() {
+void stt::SpeechToText::decode() {
     std::cout << "Start decoding\n";
-    char* stt = DS_SpeechToText(ctx, samples, count);
+    char* stt = DS_SpeechToText(_ctx, _buf.samples, _buf.count);
     std::cout << "End decoding\n";
 
     std::cout << stt << "\n";
 
-    /** @brief Convert C char* stt to CXX std::string stt_cpp. stt is freed
-     * from memory, CXX std::string will handle memory management. */
-    std::string stt_cpp = stt;
+    /** @brief Convert local C char* stt to CXX member std::string decoded. stt 
+     * is freed from memory, CXX std::string will handle memory management. */
+    _decoded = stt;
     DS_FreeString(stt);
-    return stt_cpp;
 }
 
-std::string SpeechToText::parse(std::string decoded) {
-        /** @brief Parse CXX string for key inputs. */
-    std::istringstream in(stt_cpp);
-    std::string parse;
-    int up, down, left, right;
-    up = down = left = right = 0;
-    while (in >> parse) {
-        if (parse == "up") ++up;
-        else if (parse == "down") ++down;
-        else if (parse == "left") ++left;
-        else if (parse == "right") ++right;
-        else continue;
-    }
+/**
+ * Get DeepSpeech SpeechToText decoded std::string, for Key interface to take 
+ * over and provide public Key interface.
+ * @return std::string decoded, decoded DeepSpeech SpeechToText string
+ */
+std::string stt::SpeechToText::get_decoded()
+{
+    return _decoded;
 }
 
 /**
 * DeepSpeech cleanup.
 */
-SpeechToText::~SpeechToText()
+stt::SpeechToText::~SpeechToText()
 {
-    DS_FreeModel(ctx);
+    DS_FreeModel(_ctx);
 }

@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.22...3.27)
 
 # project name, description, & lang
-project(voice
+project(speech-to-text
     DESCRIPTION "It's a voice"
     LANGUAGES CXX)
 # set version numbers
@@ -11,29 +11,32 @@ set(VERSION_MINOR 1)
 set(VERSION_PATCH 0)
 
 # declare exe
-add_executable(voice)
+add_library(stt)
 
-target_sources(voice PRIVATE src/stream.cpp)
+target_sources(stt PRIVATE src/speech-to-text.cpp
+    src/key-queue.cpp
+    src/command.cpp
+    )
 
-target_include_directories(voice PRIVATE
-    "${CMAKE_SOURCE_DIR}/include/")
+target_include_directories(stt PRIVATE
+    "${CMAKE_SOURCE_DIR}/include/stt")
 
-target_include_directories(voice PRIVATE
+target_include_directories(stt PRIVATE
     "../dep/linux/SFML-2.6.1/include/")
-target_link_directories(voice PRIVATE
+target_link_directories(stt PRIVATE
     "../dep/linux/SFML-2.6.1/lib/")
 set(SFML_DIR "../dep/linux/SFML-2.6.1/lib/cmake/SFML")
 
 
-target_include_directories(voice PRIVATE
+target_include_directories(stt PRIVATE
     "${CMAKE_SOURCE_DIR}/lib/deepspeech/")
-target_link_directories(voice PRIVATE
+target_link_directories(stt PRIVATE
     "${CMAKE_SOURCE_DIR}/lib/deepspeech/")
 
 
 find_package(SFML COMPONENTS network graphics window system REQUIRED)
 
-target_link_libraries(voice PRIVATE
+target_link_libraries(stt PRIVATE
     sfml-graphics
     sfml-window
     sfml-system
@@ -54,7 +57,7 @@ target_link_libraries(voice PRIVATE
 #    )
 
 # target features & options
-target_compile_features(voice PRIVATE cxx_std_20)
+target_compile_features(stt PRIVATE cxx_std_20)
 # m_contextdebug and release g++ flags
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-Wall")
 

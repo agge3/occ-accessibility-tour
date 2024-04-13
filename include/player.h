@@ -4,6 +4,8 @@
 
 #include "command.h"
 
+#include "stt/command.h"
+
 #include <SFML/Window/Event.hpp>
 
 #include <map>
@@ -74,12 +76,12 @@ private:
     std::map<sf::Keyboard::Key, Action> m_keybinding;
 
     /**
-     * @var std::map<stt::Input::Key, Action> _sttbinding
-     * SpeechToText Key to bind to Action.
+     * @var std::map<stt::Command::Key, Action> _sttbinding
+     * stt::Command::Key to bind to Action.
      * @note Store the keys and actions in map together instead of as seperate
      * variables.
      */
-    std::map<stt::Input::Key, Action> _sttbinding;
+    std::map<stt::Command::Key, Action> _sttbinding;
 
     /**
      * @var std::map<Action, Command> m_actionbinding
@@ -94,4 +96,6 @@ private:
      * Holds current LevelStatus of Player.
      */
     LevelStatus m_current_level_status;
+
+    stt::Command::Key _stt_key;
 };

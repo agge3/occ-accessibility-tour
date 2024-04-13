@@ -115,6 +115,14 @@ if(TARGET_SYSTEM_LINUX)
     target_link_directories(occ-accessibility-tour PRIVATE
         "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/lib/")
     set(SFML_DIR "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/lib/cmake/SFML")
+    target_include_directories(occ-accessibility-tour PRIVATE
+        "${CMAKE_SOURCE_DIR}/voice/include/")
+    target_link_directories(occ-accessibility-tour PRIVATE
+        "${CMAKE_SOURCE_DIR}/voice/lib/stt/")
+    target_include_directories(occ-accessibility-tour PRIVATE
+        "${CMAKE_SOURCE_DIR}/voice/lib/deepspeech/")
+    target_link_directories(occ-accessibility-tour PRIVATE
+        "${CMAKE_SOURCE_DIR}/voice/lib/deepspeech/")
 elseif(TARGET_SYSTEM_WIN32)
     target_include_directories(occ-accessibility-tour PRIVATE
         "${CMAKE_SOURCE_DIR}/dep/SFML-2.6.1/include/")
@@ -196,6 +204,9 @@ target_link_libraries(occ-accessibility-tour PRIVATE
     sfml-system
     OpenGL
     GL
+    sfml-audio
+    stt
+    deepspeech
     #opengl32
     #freetype
     #winmm
