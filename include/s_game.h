@@ -5,6 +5,7 @@
 #include "state.h"
 #include "world.h"
 #include "player.h"
+#include "task-thread.h"
 
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -21,4 +22,10 @@ public:
 private:
     World m_world;
     Player& m_player; // player& -> (may be) already loaded in mem
+    
+    /**
+    * @var TaskThread _stt_task
+    * Thread to async run SpeechToText on.
+    */
+    TaskThread _stt_task;
 };

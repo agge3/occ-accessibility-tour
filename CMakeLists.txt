@@ -72,6 +72,7 @@ target_sources(occ-accessibility-tour PRIVATE src/main.cpp
     src/data_tables.cpp
     src/projectile.cpp
     src/pickup.cpp
+    src/task-thread.cpp
     # imgui style config
     src/imguistyle.cpp
     # imgui dep
@@ -82,6 +83,7 @@ target_sources(occ-accessibility-tour PRIVATE src/main.cpp
     dep/imgui/imgui_widgets.cpp
     # imgui sfml backend dep
     dep/imgui-sfml/imgui-SFML.cpp
+    #voice/src/speech-to-text.cpp
     )
 #[[
 

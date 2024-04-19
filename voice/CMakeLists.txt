@@ -13,10 +13,7 @@ set(VERSION_PATCH 0)
 # declare exe
 add_library(stt)
 
-target_sources(stt PRIVATE src/speech-to-text.cpp
-    src/key-queue.cpp
-    src/command.cpp
-    )
+target_sources(stt PRIVATE src/speech-to-text.cpp)
 
 target_include_directories(stt PRIVATE
     "${CMAKE_SOURCE_DIR}/include/stt")

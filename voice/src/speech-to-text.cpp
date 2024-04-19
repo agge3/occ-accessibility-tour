@@ -21,6 +21,7 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include <sstream>
 
 static const char MODEL_PATH[] =
     "../dep/deepspeech-models/deepspeech-0.9.3-models.pbmm";
@@ -35,7 +36,9 @@ stt::SpeechToText::SpeechToText() :
     _sample_rate(16000),
     _buf(),
     _decoded(), // xxx std::optional to handle empty string instantiation (?)
-    _recorder()
+    _recorder(),
+    _key_queue(),
+    _run()
 {
     /** @brief Instantiate AudioBuffer.
      * @note Only channels are known (Channels::Mono), sf::SoundBuffer will
@@ -95,11 +98,21 @@ stt::SpeechToText::SpeechToText() :
 
 /**
  * Public run method to run SpeechToText.
+ * @return FALSE when exited.
  */
-void stt::SpeechToText::run()
+bool stt::SpeechToText::run()
 {
-    record();
-    decode();
+    // run() was called, set _run to true and enter loop
+    _run = true;
+    while (_run) {
+        // NOTE: if clear() sets _run to false, will break out of loop and exit
+        // run()
+        record();
+        decode();
+        parse();
+    }
+
+    return false;
 }
 
 /**
@@ -162,6 +175,43 @@ void stt::SpeechToText::decode() {
 std::string stt::SpeechToText::get_decoded()
 {
     return _decoded;
+}
+
+void stt::SpeechToText::parse() {    
+    /** @brief Parse CXX string for key inputs. */
+    std::istringstream in(_decoded);
+    std::string parse;
+    while (in >> parse) {
+        if (parse == "up")
+            _key_queue.push(Key::Up);
+        else if (parse == "down")
+            _key_queue.push(Key::Down);
+        else if (parse == "left") 
+            _key_queue.push(Key::Left);
+        else if (parse == "right") 
+            _key_queue.push(Key::Right);
+        else
+            continue;
+    }
+}
+
+void stt::SpeechToText::clear()
+{
+    std::queue<Key> empty;
+    std::swap(_key_queue, empty);
+    _run = false;
+}
+
+stt::Key stt::SpeechToText::get_key()
+{
+    stt::Key key = _key_queue.front();
+    _key_queue.pop();
+    return key;
+}
+
+bool stt::SpeechToText::key_queue_is_empty() const
+{
+    return _key_queue.empty();
 }
 
 /**

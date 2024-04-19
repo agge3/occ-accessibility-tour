@@ -4,11 +4,12 @@
 
 #include "command.h"
 
-#include "stt/command.h"
+#include "stt/speech-to-text.h"
 
 #include <SFML/Window/Event.hpp>
 
 #include <map>
+#include <memory>
 
 /** @brief Forward definition of CommandQueue to be used in implementation. */
 class CommandQueue;
@@ -19,6 +20,8 @@ class CommandQueue;
  */
 class Player {
 public:
+    Player();
+
     /**
      * @enum Action
      * Player actions - to allow keybinding.
@@ -49,7 +52,6 @@ public:
         Failure = 1 << 2,
     };
 
-    Player();
     // for one-time key presses
     void handle_event(const sf::Event& event, CommandQueue& commands);
     // for real-time input
@@ -63,6 +65,7 @@ public:
     LevelStatus get_level_status() const;
     /** @todo Returns nullptr until implemented. */
     char* print_assigned_key(Action action) const;
+    stt::SpeechToText* get_stt() const; 
 private:
     void initialize_actions();
     static bool is_realtime_action(Action action);
@@ -76,12 +79,12 @@ private:
     std::map<sf::Keyboard::Key, Action> m_keybinding;
 
     /**
-     * @var std::map<stt::Command::Key, Action> _sttbinding
-     * stt::Command::Key to bind to Action.
+     * @var std::map<stt::Key, Action> _sttbinding
+     * stt::Key to bind to Action.
      * @note Store the keys and actions in map together instead of as seperate
      * variables.
      */
-    std::map<stt::Command::Key, Action> _sttbinding;
+    std::map<stt::Key, Action> _sttbinding;
 
     /**
      * @var std::map<Action, Command> m_actionbinding
@@ -97,5 +100,15 @@ private:
      */
     LevelStatus m_current_level_status;
 
-    stt::Command::Key _stt_key;
+    /**
+     * @var std::unique_ptr<stt::SpeechToText> _stt
+     * Instantiate SpeechToText as std::unique_ptr and bind to Player.
+     */
+    std::unique_ptr<stt::SpeechToText> _stt;
+
+    /**
+    * @var stt::Key _stt_key
+    * SpeechToText Key for use as Player key input.
+    */
+    stt::Key _stt_key;
 };

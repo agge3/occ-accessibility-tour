@@ -27,10 +27,10 @@ struct PlayerMover {
  * constructor.
  */
 Player::Player() : 
-    m_current_level_status(InProgress),
-    _stt_key()
+    m_current_level_status(InProgress),     
+    _stt(std::make_unique<stt::SpeechToText>())
 {
-    /// Try to set initial keybindings.
+    /// Try to set default keyboard keybindings.
     try {
         m_keybinding[sf::Keyboard::Up] = MoveUp;
         std::cout << "Player keybind: Move up = Up arrow\n";
@@ -43,13 +43,40 @@ Player::Player() :
 
         // attack actions...
         m_keybinding[sf::Keyboard::Space] = MagicAttack;
-        // set inital actionbindings
-        initialize_actions(); ‘static bool stt::Command::is_key_pressed(Key)’
     } catch (std::exception& e) {
         /// Catch exception and print error message.
         std::cerr << "\n EXCEPTION: " << e.what() <<
-            ". Failed to initialize default player keybinds" << std::endl;
+            ". Failed to set default player keyboard keybindings.\n" 
+            << std::endl;
     }
+
+    /// Try to set default SpeechToText keybindings.
+    try {
+        _sttbinding[stt::Key::Up] = MoveUp;
+        std::cout << "Player keybind: Move up = SpeechToText \"Up\"\n";
+        _sttbinding[stt::Key::Down] = MoveDown;
+        std::cout << "Player keybind: Move down = SpeechToText \"Down\"\n";
+        _sttbinding[stt::Key::Left] = MoveLeft;
+        std::cout << "Player keybind: Move left = SpeechToText \"Left\"\n";
+        _sttbinding[stt::Key::Right] = MoveRight;
+        std::cout << "Player keybind: Move right = SpeechToText \"Right\"\n";
+
+    } catch (std::exception& e) {
+        /// Catch exception and print error message.
+        std::cerr << "\n EXCEPTION: " << e.what() <<
+            ". Failed to set default player SpeechToText keybindings." 
+            << std::endl;
+    }
+
+    /** Try to initialize default keybindings. */
+    try {
+        initialize_actions();
+    } catch (std::exception& e) {
+        /// Catch exception and print error message.
+        std::cerr << "\n EXCEPTION: " << e.what() <<
+            ". Failed to initialize default player keybindings." << std::endl;
+    }
+
     /** @brief All categories assigned to Player Creature. */
     for (auto& pair : m_actionbinding) {
         // uncomment to print successful action category assigned to player
@@ -69,7 +96,7 @@ void Player::handle_event(const sf::Event& event, CommandQueue& commands)
             commands.push(m_actionbinding[found->second]);
     }
 }
- ‘static bool stt::Command::is_key_pressed(Key)’
+
 void Player::handle_realtime_input(CommandQueue& commands)
 {
     /** @brief Traverses all assigned keys and checks if they are pressed. */
@@ -87,13 +114,12 @@ void Player::handle_realtime_input(CommandQueue& commands)
 
 void Player::handle_voice_input(CommandQueue& commands)
 {
-    if (stt::Command::is_stt_key(_stt_key)) {
-        _stt_key.get_key();
+    if (!_stt->key_queue_is_empty()) {
+        _stt_key = _stt->get_key();
         for (auto pair : _sttbinding) {
-            if (stt::Command::is_key_pressed(pair.first)
-                    && is_realtime_action(pair.second)) {
+            if (_stt_key == pair.first && is_realtime_action(pair.second)) {
                 // print detection of stt input
-                std::cout << "Speech to text input detected!\n"
+                std::cout << "Speech to text input detected!\n";
                 commands.push(m_actionbinding[pair.second]);
             }
         }
@@ -202,4 +228,9 @@ void Player::set_level_status(LevelStatus status)
 Player::LevelStatus Player::get_level_status() const
 {
     return m_current_level_status;
+}
+
+stt::SpeechToText* Player::get_stt() const
+{
+    return _stt.get();
 }
