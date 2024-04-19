@@ -17,7 +17,7 @@ class TaskThread {
 public:
     TaskThread();
 
-    void async(std::function<bool ()> task);
+    void async(std::function<void ()> task);
     bool async_is_finished();
     void join();
     void stop();

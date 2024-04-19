@@ -25,7 +25,7 @@ bool GameState::update(sf::Time delta_time)
     // run on separate thread and don't run again until thread has completed
 
     if (_stt_task.async_is_finished()) {
-        _stt_task.async(std::bind(&m_player.get_stt()->stt::SpeechToText::run));
+        _stt_task.async([this] { m_player.get_stt()->stt::SpeechToText::run(); });
     }
 
 
