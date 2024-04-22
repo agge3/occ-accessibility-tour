@@ -14,6 +14,7 @@ namespace Textures {
      */
     enum ID {
         Player,
+        Map,
         Grass,
         FireProjectile,
         Bunny,

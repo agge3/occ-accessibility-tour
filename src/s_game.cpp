@@ -6,10 +6,11 @@
 GameState::GameState(StateStack& stack, Context context) :
     State(stack, context),
     m_world(*context.window, *context.fonts),
-    m_player(*context.player)
+    m_player(*context.player),
+    _stt_start(true)
 {
     // print successful state creation
-    std::cout << "Game stated created!\n";
+    std::cout << "Game state created!\n";
     //std::thread _stt_thread(&stt_thread);
     //_stt_thread.detach();
 }
@@ -24,13 +25,11 @@ bool GameState::update(sf::Time delta_time)
     // xxx game state is updating, meaning stt should be running...
     // run on separate thread and don't run again until thread has completed
 
-    if (_stt_task.async_is_finished()) {
-        _stt_task.async([this] { m_player.get_stt()->stt::SpeechToText::run(); });
+    if (_stt_start) {
+        m_player.run_stt();
+        std::cout << "Creating thread...\n";
+        _stt_start = false;
     }
-
-
-
-
 
 
 

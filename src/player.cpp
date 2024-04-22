@@ -1,6 +1,7 @@
 #include "player.h"
 #include "command_queue.h"
 #include "creature.h"
+#include "task-thread.h"
 
 #include <map>
 #include <string>
@@ -10,14 +11,20 @@
 
 using namespace std::placeholders;
 
+sf::Vector2f PREV_PLAYER_MOVEMENT(0.f, 0.f);
+
 struct PlayerMover {
     PlayerMover(float vx, float vy) : velocity(vx, vy) {}
     void operator() (Creature& player, sf::Time) const
     {
-        player.accelerate(velocity * player.get_max_speed());
+        sf::Vector2f movement(velocity * player.get_max_speed());
+        PREV_PLAYER_MOVEMENT = movement;
+        std::cout << "Previous Player movement: (" << movement.x << "x, " 
+            << movement.y << "y)\n";
+        player.accelerate(movement);
         // uncomment to print current player velocity
-        std::cout << "Player velocity: (" << velocity.x * player.get_max_speed()
-            << ", " << velocity.y * player.get_max_speed() << ")\n";
+        //std::cout << "Player velocity: (" << velocity.x * player.get_max_speed()
+        //    << ", " << velocity.y * player.get_max_speed() << ")\n";
     }
     sf::Vector2f velocity;
 };
@@ -167,17 +174,31 @@ void Player::initialize_actions() {
     /** @brief Movement commands increment and decrement player speed. */
     // @note y-axis up/down pos/neg is inverse!
 	m_actionbinding[MoveUp].action = derived_action<Creature>(
-            PlayerMover(0.f, -1.f));
+            PlayerMover(0.f, -5.f));
     std::cout << "Player action initialized: Move up\n";
 	m_actionbinding[MoveDown].action = derived_action<Creature>(
-            PlayerMover(0.f, +1.f));
+            PlayerMover(0.f, +5.f));
     std::cout << "Player action initialized: Move down\n";
     m_actionbinding[MoveLeft].action = derived_action<Creature>(
-            PlayerMover(-1.f, 0.f));
+            PlayerMover(-5.f, 0.f));
     std::cout << "Player action initialized: Move left\n";
 	m_actionbinding[MoveRight].action = derived_action<Creature>(
-            PlayerMover(+1.f, 0.f));
+            PlayerMover(+5.f, 0.f));
     std::cout << "Player action initialized: Move right\n";
+	
+    // STT actions:
+    m_actionbinding[STTMoveUp].action = derived_action<Creature>(
+            PlayerMover(0.f, -50.f));
+    std::cout << "Player SpeechToText action initialized: Move up\n";
+	m_actionbinding[STTMoveDown].action = derived_action<Creature>(
+            PlayerMover(0.f, +50.f));
+    std::cout << "Player SpeechToText action initialized: Move down\n";
+    m_actionbinding[STTMoveLeft].action = derived_action<Creature>(
+            PlayerMover(-50.f, 0.f));
+    std::cout << "Player SpeechToText action initialized: Move left\n";
+	m_actionbinding[STTMoveRight].action = derived_action<Creature>(
+            PlayerMover(+50.f, 0.f));
+    std::cout << "Player SpeechToText action initialized: Move right\n";
 
     // attack actions...
     // std::bind binds the para "_1" to always be the para for &attack ...
@@ -230,7 +251,15 @@ Player::LevelStatus Player::get_level_status() const
     return m_current_level_status;
 }
 
-stt::SpeechToText* Player::get_stt() const
+void Player::run_stt()
 {
-    return _stt.get();
+    _stt_task.async([this]() { _stt->run(); });
+}
+
+bool Player::is_stt_running()
+{
+    if (!_stt_task.async_is_finished())
+        return true;
+
+    return false;
 }

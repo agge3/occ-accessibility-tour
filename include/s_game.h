@@ -28,4 +28,6 @@ private:
     * Thread to async run SpeechToText on.
     */
     TaskThread _stt_task;
+    
+    bool _stt_start;
 };

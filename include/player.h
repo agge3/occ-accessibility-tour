@@ -3,13 +3,17 @@
 //#define SFML_STATIC
 
 #include "command.h"
+#include "task-thread.h"
 
-#include "stt/speech-to-text.h"
+#include "speech-to-text.h"
 
 #include <SFML/Window/Event.hpp>
+#include <SFML/System/Vector2.hpp>
 
 #include <map>
 #include <memory>
+
+extern sf::Vector2f PREV_PLAYER_MOVEMENT;
 
 /** @brief Forward definition of CommandQueue to be used in implementation. */
 class CommandQueue;
@@ -38,6 +42,10 @@ public:
         SpecialAttack = 1 << 7,
         Inventory = 1 << 8,
         Map = 1 << 9,
+        STTMoveUp = 1 << 10,
+        STTMoveDown = 1 << 11,
+        STTMoveLeft = 1 << 12,
+        STTMoveRight = 1 << 13,
     };
 
     /**
@@ -65,7 +73,8 @@ public:
     LevelStatus get_level_status() const;
     /** @todo Returns nullptr until implemented. */
     char* print_assigned_key(Action action) const;
-    stt::SpeechToText* get_stt() const; 
+    void run_stt();
+    bool is_stt_running();
 private:
     void initialize_actions();
     static bool is_realtime_action(Action action);
@@ -111,4 +120,6 @@ private:
     * SpeechToText Key for use as Player key input.
     */
     stt::Key _stt_key;
+
+    TaskThread _stt_task;
 };

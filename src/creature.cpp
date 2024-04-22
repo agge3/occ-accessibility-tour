@@ -217,9 +217,9 @@ void Creature::update_texts()
     // catting str with '+'...?
     m_health_display->set_string(std::to_string(get_hitpoints()) + " HP");
     // print success to make sure this is only done once!
-    std::cout << "Update texts: Health display text set ... success!\n"
+    //std::cout << "Update texts: Health display text set ... success!\n"
         // and shows the correct string...
-        << "Text: " << std::to_string(get_hitpoints()) << " HP\n";
+        //<< "Text: " << std::to_string(get_hitpoints()) << " HP\n";
     m_health_display->setPosition(0.f, 50.f);
     // -rotation negates any rotation of creature and keeps text upright
     m_health_display->setRotation(-getRotation());
@@ -332,3 +332,15 @@ void Creature::create_pickup(SceneNode& node, const TextureHolder& textures)
     /// Attach pickup as child scene node on the scene graph.
     node.attach_child(std::move(pickup));
 }
+
+// NOTE: To be revisited. Either delete or implement. Don't want to lose idea.
+///**
+//* @param sf::Vector2f empty, pass an empty sf::Vector2f and it will be modified
+//* to contain last Player movement.
+//* @return void, so function cannot be misused.
+//* @note ONLY for Player movement, to revert last movement.
+//*/
+//void Creature::get_last_movement(sf::Vector2f pmov) const
+//{
+//    if (Category::Player)
+//}

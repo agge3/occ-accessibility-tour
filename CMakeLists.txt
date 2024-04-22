@@ -73,6 +73,8 @@ target_sources(occ-accessibility-tour PRIVATE src/main.cpp
     src/projectile.cpp
     src/pickup.cpp
     src/task-thread.cpp
+    # compile stt into occ-accessibility tour
+    stt/src/speech-to-text.cpp
     # imgui style config
     src/imguistyle.cpp
     # imgui dep
@@ -83,7 +85,6 @@ target_sources(occ-accessibility-tour PRIVATE src/main.cpp
     dep/imgui/imgui_widgets.cpp
     # imgui sfml backend dep
     dep/imgui-sfml/imgui-SFML.cpp
-    #voice/src/speech-to-text.cpp
     )
 #[[
 
@@ -118,13 +119,13 @@ if(TARGET_SYSTEM_LINUX)
         "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/lib/")
     set(SFML_DIR "${CMAKE_SOURCE_DIR}/dep/linux/SFML-2.6.1/lib/cmake/SFML")
     target_include_directories(occ-accessibility-tour PRIVATE
-        "${CMAKE_SOURCE_DIR}/voice/include/")
-    target_link_directories(occ-accessibility-tour PRIVATE
-        "${CMAKE_SOURCE_DIR}/voice/lib/stt/")
+        "${CMAKE_SOURCE_DIR}/stt/include/stt/")
+    #target_link_directories(occ-accessibility-tour PRIVATE
+    #    "${CMAKE_SOURCE_DIR}/voice/lib/stt/")
     target_include_directories(occ-accessibility-tour PRIVATE
-        "${CMAKE_SOURCE_DIR}/voice/lib/deepspeech/")
+        "${CMAKE_SOURCE_DIR}/stt/lib/deepspeech/")
     target_link_directories(occ-accessibility-tour PRIVATE
-        "${CMAKE_SOURCE_DIR}/voice/lib/deepspeech/")
+        "${CMAKE_SOURCE_DIR}/stt/lib/deepspeech/")
 elseif(TARGET_SYSTEM_WIN32)
     target_include_directories(occ-accessibility-tour PRIVATE
         "${CMAKE_SOURCE_DIR}/dep/SFML-2.6.1/include/")
@@ -207,7 +208,7 @@ target_link_libraries(occ-accessibility-tour PRIVATE
     OpenGL
     GL
     sfml-audio
-    stt
+    #stt
     deepspeech
     #opengl32
     #freetype

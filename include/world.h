@@ -15,6 +15,7 @@
 #include <SFML/System/NonCopyable.hpp>
 #include <SFML/Graphics/View.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/Graphics/Image.hpp>
 
 #include <array>
 #include <queue>
@@ -83,6 +84,7 @@ private:
             Category::Type type2) const;
     sf::FloatRect get_view_bounds() const;
     sf::FloatRect get_chunk_bounds() const;
+    void handle_map_collisions();
 
     sf::RenderWindow& m_window;
     sf::View m_world_view;
@@ -102,4 +104,13 @@ private:
     std::vector<SpawnPoint> m_npc_spawn_points;
     /// Holds Ptr to all active NPCs.
     std::vector<Creature*> m_active_npcs;
+
+    /**
+    * @var sf::Image _map
+    * Copies sf::Texture from GPU into an sf::Image, for checking map 
+    * collisions.
+    * @warning Might be very slow operation! Has to copy from GPU...
+    * @remark Probably find better solution. Temporary!
+    */
+    sf::Image _map;
 };

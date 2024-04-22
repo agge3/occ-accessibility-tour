@@ -1,21 +1,51 @@
 #include "task-thread.h"
 
+// xxx is instantiating thread in constructor going to have issues? LOOK INTO!
 TaskThread::TaskThread() :
-    _th(),
     _wakeup(false),
     _stop(false),
-    _finished(true)
+    _th()
+    // xxx _th should already be instantiated upon object creation (?) others?
 {}
+
+// xxx review sfml game-dev book for implentation of locking
+// xxx template<typename ReturnType>
+/**
+ * Private method that accepts a std::packaged_task function and invokes it.
+ */
+template <typename ReturnType>
+void TaskThread::run_task(std::packaged_task<ReturnType ()>&& task)
+{
+    task();
+}
 
 /**
  * Run bool async Task (return FALSE when finished).
+ * @note Pass void anonymous function (as lambda), but std::packaged_task 
+ * expects bool. Underlying expected function is bool.
  */
-void TaskThread::async(std::function<bool ()> task)
+void TaskThread::async(std::function<void ()> task)
 {
-    std::packaged_task<bool ()> ptask(task);
-    _th(std::move(ptask);
-    _th.detach();
+    // assume task completion means TRUE
+    std::packaged_task<bool ()> ptask([task]() -> bool {
+        // xxx maybe want this?
+        //if (task_) {
+        //    task_(); // Execute the task if it's not empty
+        //    return true;
+        //} else {
+        //    return false; // Return false if the task is empty
+        //}
+
+        task();
+        return true;
+    });
+
     _fut = ptask.get_future();
+    /// xxx 2 threads of no? look into (!)
+    _th = std::thread(&TaskThread::run_task<bool>, this, std::move(ptask));
+    _th.detach();
+
+    /// xxx look into this (?)
     //{
     //    auto lock = std::unique_lock<std::mutex>(_mtx);
     //    _finished = false;
@@ -28,7 +58,7 @@ void TaskThread::async(std::function<bool ()> task)
 bool TaskThread::async_is_finished()
 {
     auto lock = std::unique_lock<std::mutex>(_mtx);
-    if (_fut != false)
+    if (_fut.get() != false)
         return false;
 
     return true;
@@ -71,4 +101,13 @@ void TaskThread::stop()
 void TaskThread::join()
 {
     _th.join();
+}
+
+/**
+* Upon object destruction, cleanup and join thread back to main.
+*/
+TaskThread::~TaskThread()
+{
+    if (_th.joinable())
+        _th.join();
 }

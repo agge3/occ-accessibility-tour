@@ -16,6 +16,7 @@
 class TaskThread {
 public:
     TaskThread();
+    ~TaskThread();
 
     void async(std::function<void ()> task);
     bool async_is_finished();
@@ -24,8 +25,11 @@ public:
     void wait();
     void wakeup();
 private:
+    template <typename ReturnType>
+    void run_task(std::packaged_task<ReturnType ()>&& task);
+
     std::thread _th;
-    std::future<bool> _fut;
+    std::shared_future<bool> _fut;
     std::mutex _mtx;
     std::condition_variable _cv;
 
