@@ -26,7 +26,7 @@ World::World(sf::RenderWindow& window, FontHolder& fonts) :
 
     // world third ->
     // set the size of the world
-    m_world_bounds(0.f, 0.f, 10000.f, 9200.f),
+    m_world_bounds(0.f, 0.f, 8192.f, 7536.f),
     // set player view to be zoomed in, keeping aspect ratio - 1.78
     m_world_view(sf::FloatRect(0.f, 0.f, 1366.f, 768.f)),
     m_scroll_speed(0.f),
@@ -108,12 +108,12 @@ CommandQueue& World::get_command_queue()
 void World::load_textures()
 {
     //m_textures.load(Textures::Grass, "textures/world/grass1.png");
-    m_textures.load(Textures::Map, "textures/world/occ-map-test.png");
+    m_textures.load(Textures::Map, "textures/world/occ-map-test-2.png");
     // NOTE: also need to load this into an sf::Image, for map collision 
     // checking
     _map = m_textures.get(Textures::Map).copyToImage();
 
-    m_textures.load(Textures::Player, "textures/player/pete-128px.png");
+    m_textures.load(Textures::Player, "textures/player/pete-96px.png");
     m_textures.load(Textures::FireProjectile, "textures/player/player.png");
 
     m_textures.load(Textures::Bunny, "textures/player/player.png");
