@@ -284,6 +284,11 @@ void stt::SpeechToText::parse()
         // AFTER CUSTOM SCORER:
         else if (parse == "le")
             _key_queue.push(Key::Left);
+
+        else if (parse == "play")
+            _key_queue.push(Key::Play);
+        else if (parse == "exit")
+            _key_queue.push(Key::Exit);
         
         else
             continue;

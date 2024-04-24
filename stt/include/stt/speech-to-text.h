@@ -25,12 +25,14 @@ namespace stt {
 *  @remark Size of enum is defined, to be forwarded.
 */
 enum class Key {
-    Unknown = -1,
+    None = -1,
     A = 0,
     Up,
     Down,
     Left,
     Right,
+    Play,
+    Exit,
 };
 
 class SpeechToText {

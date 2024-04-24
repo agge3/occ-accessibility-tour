@@ -19,12 +19,13 @@ struct PlayerMover {
     {
         sf::Vector2f movement(velocity * player.get_max_speed());
         PREV_PLAYER_MOVEMENT = movement;
-        std::cout << "Previous Player movement: (" << movement.x << "x, " 
-            << movement.y << "y)\n";
+        // uncomment to print previous player movement
+        //std::cout << "Previous Player movement: (" << movement.x << "x, " 
+        //    << movement.y << "y)\n";
         player.accelerate(movement);
         // uncomment to print current player velocity
-        //std::cout << "Player velocity: (" << velocity.x * player.get_max_speed()
-        //    << ", " << velocity.y * player.get_max_speed() << ")\n";
+        std::cout << "Player velocity: (" << velocity.x * player.get_max_speed()
+            << ", " << velocity.y * player.get_max_speed() << ")\n";
     }
     sf::Vector2f velocity;
 };
@@ -119,7 +120,7 @@ void Player::handle_realtime_input(CommandQueue& commands)
     }
 }
 
-void Player::handle_voice_input(CommandQueue& commands)
+void Player::handle_stt_input(CommandQueue& commands)
 {
     if (!_stt->key_queue_is_empty()) {
         _stt_key = _stt->get_key();
@@ -173,6 +174,7 @@ char* Player::print_assigned_key(Action action) const
 void Player::initialize_actions() {
     /** @brief Movement commands increment and decrement player speed. */
     // @note y-axis up/down pos/neg is inverse!
+    // @note 5.f is IDEAL!
 	m_actionbinding[MoveUp].action = derived_action<Creature>(
             PlayerMover(0.f, -5.f));
     std::cout << "Player action initialized: Move up\n";
@@ -188,16 +190,16 @@ void Player::initialize_actions() {
 	
     // STT actions:
     m_actionbinding[STTMoveUp].action = derived_action<Creature>(
-            PlayerMover(0.f, -50.f));
+            PlayerMover(0.f, -150.f));
     std::cout << "Player SpeechToText action initialized: Move up\n";
 	m_actionbinding[STTMoveDown].action = derived_action<Creature>(
-            PlayerMover(0.f, +50.f));
+            PlayerMover(0.f, +150.f));
     std::cout << "Player SpeechToText action initialized: Move down\n";
     m_actionbinding[STTMoveLeft].action = derived_action<Creature>(
-            PlayerMover(-50.f, 0.f));
+            PlayerMover(-150.f, 0.f));
     std::cout << "Player SpeechToText action initialized: Move left\n";
 	m_actionbinding[STTMoveRight].action = derived_action<Creature>(
-            PlayerMover(+50.f, 0.f));
+            PlayerMover(+150.f, 0.f));
     std::cout << "Player SpeechToText action initialized: Move right\n";
 
     // attack actions...
@@ -224,6 +226,10 @@ bool Player::is_realtime_action(Action action)
     case MoveLeft:
     case MoveRight:
     case MagicAttack:
+    case STTMoveUp:
+    case STTMoveDown:
+    case STTMoveLeft:
+    case STTMoveRight:
         return true;
         break;
     // if not explicitly defined as real-time, return false -> don't handle

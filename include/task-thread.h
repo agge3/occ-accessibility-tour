@@ -24,6 +24,7 @@ public:
     void stop();
     void wait();
     void wakeup();
+    void native_cancel();
 private:
     template <typename ReturnType>
     void run_task(std::packaged_task<ReturnType ()>&& task);

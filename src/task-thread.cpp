@@ -1,5 +1,10 @@
 #include "task-thread.h"
 
+#include <pthread.h>
+#include <signal.h>
+
+#include <iostream>
+
 // xxx is instantiating thread in constructor going to have issues? LOOK INTO!
 TaskThread::TaskThread() :
     _wakeup(false),
@@ -101,6 +106,19 @@ void TaskThread::stop()
 void TaskThread::join()
 {
     _th.join();
+}
+
+/** 
+ * @warning Native kill procedure only! (Linux)
+ * Call native kill procedure (pthread_kill()).
+ */
+void TaskThread::native_cancel()
+{
+    pthread_t pth = _th.native_handle();
+    std::cout << "Native handle of thread recieved!\n"
+        << "Sending SIGKILL to thread...\n";
+    //pthread_kill(pth, SIGKILL);
+    pthread_cancel(NULL);
 }
 
 /**

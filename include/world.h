@@ -85,6 +85,7 @@ private:
     sf::FloatRect get_view_bounds() const;
     sf::FloatRect get_chunk_bounds() const;
     void handle_map_collisions();
+    void handle_map_edges();
 
     sf::RenderWindow& m_window;
     sf::View m_world_view;

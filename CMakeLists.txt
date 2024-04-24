@@ -126,6 +126,11 @@ if(TARGET_SYSTEM_LINUX)
         "${CMAKE_SOURCE_DIR}/stt/lib/deepspeech/")
     target_link_directories(occ-accessibility-tour PRIVATE
         "${CMAKE_SOURCE_DIR}/stt/lib/deepspeech/")
+
+    # for linux system headers
+    target_include_directories(occ-accessibility-tour PRIVATE
+        "/usr/include/")
+
 elseif(TARGET_SYSTEM_WIN32)
     target_include_directories(occ-accessibility-tour PRIVATE
         "${CMAKE_SOURCE_DIR}/dep/SFML-2.6.1/include/")

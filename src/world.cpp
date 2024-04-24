@@ -84,6 +84,7 @@ void World::update(sf::Time delta_time)
     /// outside view, because adapt_player_position() handles appropriately).
     m_scene_graph.update(delta_time, m_command_queue);
     adapt_player_position();
+    handle_map_edges();
 }
 
 void World::draw()
@@ -108,7 +109,7 @@ CommandQueue& World::get_command_queue()
 void World::load_textures()
 {
     //m_textures.load(Textures::Grass, "textures/world/grass1.png");
-    m_textures.load(Textures::Map, "textures/world/occ-map-test-2.png");
+    m_textures.load(Textures::Map, "textures/world/occ-map-3-8192x7536.png");
     // NOTE: also need to load this into an sf::Image, for map collision 
     // checking
     _map = m_textures.get(Textures::Map).copyToImage();
@@ -158,8 +159,9 @@ void World::build_scene()
 void World::adapt_player_position()
 {
     /// Initialize view bounds to world view.
+    // 1st param, top left: center - (size / 2)
   	sf::FloatRect view(m_world_view.getCenter()
-            - m_world_view.getSize() / 2.f, m_world_view.getSize());
+            - (m_world_view.getSize() / 2.f), m_world_view.getSize());
     /// Initialize distance from "border" (before view pan).
     // what distance from border before panning view? 16.f = 16px
 	constexpr float border = 16.f;
@@ -167,72 +169,56 @@ void World::adapt_player_position()
     /// Initialize position to player position.
 	sf::Vector2f pos = m_player_creature->getPosition();
 
-    // if view_bounds overlaps or exceeds m_world_bounds, then don't pan
+    // numbers for map pan calculations
+    float x_range = m_world_bounds.width;
+    float y_range = m_world_bounds.height;
 
-    //if (view_bounds.intersects(m_world_bounds)) {
-    //    m_world_view.move(
-
-    sf::FloatRect edge(m_world_bounds);
-
-    // left edge: 0x, 0-7536y
-    // right edge: 8192x, 0-7536y
-    // top edge: 0-8192x, 0y
-    // bottom edge: 0-8192x, 7536y
-    m_world_bounds(0.f, 0.f, 8192.f, 7536.f);
-    
-    struct Edge {
-        sf::Vector2f left = {0.f, 0.f}; // y-range: 0-7536
-        sf::Vector2f right = {8192, 0.f}; // y-range: 0-7536
-        sf::Vector2f top = {0.f, 0.f}; // x-range: 0-8192
-        sf::Vector2f bottom = {0.f, 7536}; // x-range: 0-8192
-        float x_range = 8192; // less than!
-        float y_range = 7536; // less than!
-    };
-        
-    
-    float x_range = 8192; // less than!
-    float y_range = 7536; // less than!
-
-	// pos.x = pos.x || (0x + border_dist, y), if pos.x <= pan neg to the left
-    // on the x-axis
-    if (pos.x = std::max(pos.x, view.left + border),
-            pos.x <= view.left + border) {
-        if (-(view.width / 2.f) <= 0.f) {
-            float edge = -(view.width / 2) + abs(0 - (view.width / 2 ));
-            m_world.view.move(edge, 0.f);
+	// if pos.x <= pan neg to the left on the x-axis
+    if (pos.x <= view.left + border) {
+        if (m_world_view.getCenter().x - view.width <= 0) {
+            float edge = abs(m_world_view.getCenter().x - view.width);
+            m_world_view.move(-(view.width / 2.f) + edge, 0.f);
         } else {
             // pan half distance of view bounds (world view)
-            m_world_view.move(-(view.width / 2), 0.f);
+            m_world_view.move(-(view.width / 2.f), 0.f);
         }
     }
 
-    pos.x = std::max(pos.x, view.left + border)
-
-    // (WIDTHx - border_dist, y), if pos.x >= pan pos to the right on the x-asis
-    if (position.x = std::min(pos.x,
-            view.left + view.width - border),
-            pos.x >= view.left + view.width - border) {
-        if ((view.width / 2.f) >= 
-        m_world_view.move(view.width / 2, 0.f);
+    // if pos.x >= pan pos to the right on the x-axis
+    if (pos.x >= view.left + view.width - border) {
+        if (m_world_view.getCenter().x + view.width >= x_range) {
+            float edge = m_world_view.getCenter().x + view.width - x_range;
+            m_world_view.move((view.width / 2.f) - edge, 0.f);
+        } else {
+            m_world_view.move(view.width / 2.f, 0.f);
+        }
     }
 
     // same as x-axis, for y-axis
-    if (position.y = std::max(pos.y, view.top + border),
-            pos.y <= view.top + border) {
-        m_world_view.move(0.f, -(view.height / 2));
+    if (pos.y <= view.top + border) {
+        if (m_world_view.getCenter().y - view.height <= 0) {
+            float edge = abs(m_world_view.getCenter().y - view.height);
+            m_world_view.move(0.f, -(view.height / 2.f) + edge);
+        } else {
+            m_world_view.move(0.f, -(view.height / 2.f));
+        }
     }
 
-	if (position.y = std::min(pos.y,
-            view.top + view.height - border),
-            pos.y >= view.top + view.height - border) {
-        m_world_view.move(0.f, view.height / 2);
+	if (pos.y >= view.top + view.height - border) {
+        if (m_world_view.getCenter().y + view.height >= y_range) {
+            float edge = m_world_view.getCenter().y + view.height - y_range;
+            // -1 is magic number, seg faulting when crossing y max boundary!
+            m_world_view.move(0.f, (view.height / 2.f) - edge - 1);
+        } else {
+            m_world_view.move(0.f, view.height / 2.f);
+        }
     }
 
     /// Set player position to current position.
-	m_player_creature->setPosition(position);
+	m_player_creature->setPosition(pos);
 
     // uncomment to print current player pos
-    //std::cout << "Player position: (" << position.x << ", " << position.y << ")\n";
+    //std::cout << "Player position: (" << pos.x << ", " << pos.y << ")\n";
 }
 
 void World::adapt_player_velocity()
@@ -496,7 +482,10 @@ void World::handle_map_collisions()
 
     // sort out map collisions: conditions to check if player sprite intersects 
     // with black borders on map
-    if (color_at_xy == sf::Color::Black) {
+    if (color_at_xy == sf::Color(120, 4, 34)
+            || color_at_xy == sf::Color(63, 0, 127)
+            || color_at_xy == sf::Color(95, 62, 29)
+            || color_at_xy == sf::Color(255, 106, 0)) {
         std::cout << "Player hit wall of building!\n";
         sf::Vector2f prev = PREV_PLAYER_MOVEMENT;
         std::cout << prev.x << "\n" << prev.y << "\n";
@@ -534,4 +523,28 @@ void World::handle_map_collisions()
     //    return pos.x + m_player_creature.getSize().y / 2.f; });
 
     //float overlap_left 
-} 
+}
+
+void World::handle_map_edges() 
+{
+    sf::Vector2f pos = m_player_creature->getPosition();
+    float x_range = m_world_bounds.width;
+    float y_range = m_world_bounds.height;
+    if (pos.x <= 0.f) {
+        pos.x = 0.f;
+        m_player_creature->setPosition(pos);
+    }
+    if (pos.x >= x_range) {
+        pos.x = x_range;
+        m_player_creature->setPosition(pos);
+    }
+    if (pos.y <= 0.f) {
+        pos.y = 0.f;
+        m_player_creature->setPosition(pos);
+    }
+    // -1 is magic number, seg faulting when crossing y max boundary!
+    if (pos.y >= y_range - 1) {
+        pos.y = y_range - 1;
+        m_player_creature->setPosition(pos);
+    }
+}

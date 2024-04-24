@@ -46,6 +46,8 @@ public:
         STTMoveDown = 1 << 11,
         STTMoveLeft = 1 << 12,
         STTMoveRight = 1 << 13,
+        STTExit = 1 << 14,
+        STTPlay = 1 << 15,
     };
 
     /**
@@ -65,7 +67,7 @@ public:
     // for real-time input
     void handle_realtime_input(CommandQueue& commands);
     // for local voice lib
-    void handle_voice_input(CommandQueue& commands);
+    void handle_stt_input(CommandQueue& commands);
     // fn to bind keys and get assigned keys
     void assign_key(Action action, sf::Keyboard::Key key);
     sf::Keyboard::Key get_assigned_key(Action action) const;
