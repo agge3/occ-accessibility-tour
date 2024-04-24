@@ -158,34 +158,75 @@ void World::build_scene()
 void World::adapt_player_position()
 {
     /// Initialize view bounds to world view.
-  	sf::FloatRect view_bounds(m_world_view.getCenter()
+  	sf::FloatRect view(m_world_view.getCenter()
             - m_world_view.getSize() / 2.f, m_world_view.getSize());
     /// Initialize distance from "border" (before view pan).
     // what distance from border before panning view? 16.f = 16px
-	constexpr float border_distance = 16.f;
+	constexpr float border = 16.f;
 
     /// Initialize position to player position.
-	sf::Vector2f position = m_player_creature->getPosition();
+	sf::Vector2f pos = m_player_creature->getPosition();
+
+    // if view_bounds overlaps or exceeds m_world_bounds, then don't pan
+
+    //if (view_bounds.intersects(m_world_bounds)) {
+    //    m_world_view.move(
+
+    sf::FloatRect edge(m_world_bounds);
+
+    // left edge: 0x, 0-7536y
+    // right edge: 8192x, 0-7536y
+    // top edge: 0-8192x, 0y
+    // bottom edge: 0-8192x, 7536y
+    m_world_bounds(0.f, 0.f, 8192.f, 7536.f);
+    
+    struct Edge {
+        sf::Vector2f left = {0.f, 0.f}; // y-range: 0-7536
+        sf::Vector2f right = {8192, 0.f}; // y-range: 0-7536
+        sf::Vector2f top = {0.f, 0.f}; // x-range: 0-8192
+        sf::Vector2f bottom = {0.f, 7536}; // x-range: 0-8192
+        float x_range = 8192; // less than!
+        float y_range = 7536; // less than!
+    };
+        
+    
+    float x_range = 8192; // less than!
+    float y_range = 7536; // less than!
 
 	// pos.x = pos.x || (0x + border_dist, y), if pos.x <= pan neg to the left
     // on the x-axis
-    if (position.x = std::max(position.x, view_bounds.left + border_distance),
-            position.x <= view_bounds.left + border_distance)
-        // pan half distance of view bounds (world view)
-        m_world_view.move(-(view_bounds.width / 2), 0.f);
+    if (pos.x = std::max(pos.x, view.left + border),
+            pos.x <= view.left + border) {
+        if (-(view.width / 2.f) <= 0.f) {
+            float edge = -(view.width / 2) + abs(0 - (view.width / 2 ));
+            m_world.view.move(edge, 0.f);
+        } else {
+            // pan half distance of view bounds (world view)
+            m_world_view.move(-(view.width / 2), 0.f);
+        }
+    }
+
+    pos.x = std::max(pos.x, view.left + border)
+
     // (WIDTHx - border_dist, y), if pos.x >= pan pos to the right on the x-asis
-    if (position.x = std::min(position.x,
-            view_bounds.left + view_bounds.width - border_distance),
-            position.x >= view_bounds.left + view_bounds.width - border_distance)
-        m_world_view.move(view_bounds.width / 2, 0.f);
+    if (position.x = std::min(pos.x,
+            view.left + view.width - border),
+            pos.x >= view.left + view.width - border) {
+        if ((view.width / 2.f) >= 
+        m_world_view.move(view.width / 2, 0.f);
+    }
+
     // same as x-axis, for y-axis
-    if (position.y = std::max(position.y, view_bounds.top + border_distance),
-            position.y <= view_bounds.top + border_distance)
-        m_world_view.move(0.f, -(view_bounds.height / 2));
-	if (position.y = std::min(position.y,
-            view_bounds.top + view_bounds.height - border_distance),
-            position.y >= view_bounds.top + view_bounds.height - border_distance)
-        m_world_view.move(0.f, view_bounds.height / 2);
+    if (position.y = std::max(pos.y, view.top + border),
+            pos.y <= view.top + border) {
+        m_world_view.move(0.f, -(view.height / 2));
+    }
+
+	if (position.y = std::min(pos.y,
+            view.top + view.height - border),
+            pos.y >= view.top + view.height - border) {
+        m_world_view.move(0.f, view.height / 2);
+    }
 
     /// Set player position to current position.
 	m_player_creature->setPosition(position);
