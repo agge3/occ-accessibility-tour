@@ -77,8 +77,9 @@ void World::update(sf::Time delta_time)
 
     /** @remark UNUSED, no NPCs... */
     /// Remove all destroyed entities and create new ones.
-    /* m_scene_graph.removal();
-    spawn_npcs(); */
+    //m_scene_graph.removal();
+    handle_player_death();
+    //spawn_npcs();
 
     /// Regular game update step, adapt player position (correct even though
     /// outside view, because adapt_player_position() handles appropriately).
@@ -490,6 +491,9 @@ void World::handle_map_collisions()
         sf::Vector2f prev = PREV_PLAYER_MOVEMENT;
         std::cout << prev.x << "\n" << prev.y << "\n";
         m_player_creature->accelerate(-prev);
+
+        // damage player 0.05 hp (~1/24th of a day)
+        m_player_creature->damage(0.05);    
     }
 
     //if player pos == black
@@ -546,5 +550,20 @@ void World::handle_map_edges()
     if (pos.y >= y_range - 1) {
         pos.y = y_range - 1;
         m_player_creature->setPosition(pos);
+    }
+}
+
+void World::handle_player_death()
+{
+    if (m_player_creature->is_marked_for_removal()) {
+        // @note original unique_ptr will lose scope and call its destructor
+        // - memory safe
+        m_scene_graph.removal();
+        // Add player character to the scene.
+        std::unique_ptr<Creature> player(new Creature(
+                Creature::Player, m_textures, m_fonts));
+        m_player_creature = player.get();
+        m_player_creature->setPosition(m_player_spawn_point);
+        m_scene_layers[Foreground]->attach_child(std::move(player));
     }
 }

@@ -24,15 +24,11 @@ bool GameState::update(sf::Time delta_time)
 {
     // xxx game state is updating, meaning stt should be running...
     // run on separate thread and don't run again until thread has completed
-
     if (_stt_start) {
         m_player.run_stt();
         std::cout << "Creating thread...\n";
         _stt_start = false;
     }
-
-
-
 
     /// Update and realtime input done in same update cycle of game state.
     m_world.update(delta_time);

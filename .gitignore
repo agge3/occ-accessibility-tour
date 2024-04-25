@@ -17,3 +17,11 @@ dep/SFML
 dep/old
 dep/imgui-sfml
 dep/imgui
+release/dep/CMakeLists.txt
+release/dep/deepspeech-models
+release/dep/deepspeech-models/deepspeech-0.9.3-models.pbmm
+release/dep/deepspeech-models/deepspeech-0.9.3-models.scorer
+release/dep/deepspeech-models/kenlm.scorer
+release/dep/imgui
+release/dep/imgui-sfml
+release/dep/linux

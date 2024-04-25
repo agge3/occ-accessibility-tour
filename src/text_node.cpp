@@ -30,3 +30,11 @@ void TextNode::set_string(const std::string& text)
     m_text.setString(text);
     center_origin(m_text);
 }
+
+/**
+* Set fill color of underlying sf::Text.
+*/
+void TextNode::set_fill_color(int r, int g, int b, int alpha) {
+    sf::Color color(r, g, b, alpha);
+    m_text.setFillColor(color);
+}
