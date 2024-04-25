@@ -55,6 +55,8 @@ private:
      */
     enum Layer {
         Background,
+        Map,
+        MapAssets,
         Foreground,
         LayerCount
     };
@@ -88,6 +90,8 @@ private:
     void handle_map_collisions();
     void handle_map_edges();
     void handle_player_death();
+    void load_map();
+    void build_map();
 
     sf::RenderWindow& m_window;
     sf::View m_world_view;

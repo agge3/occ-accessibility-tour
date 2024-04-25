@@ -2,7 +2,7 @@
 
 /*
  * @namespace Category
- * Entity/SceneNode Category(ies), used to dispatch commandnamespace Category {
+ * Entity/SceneNode Category(ies), used to dispatch commands
  */
 namespace Category {
     enum Type {
@@ -21,6 +21,7 @@ namespace Category {
         FriendlyPickup = 1 << 10,
         NeutralPickup = 1 << 11,
         EnemyPickup = 1 << 12,
+        MapAssets = 1 << 13,
         // TODO: decide if there needs to be player, friendly, neutral, enemy
         // for every entity
 

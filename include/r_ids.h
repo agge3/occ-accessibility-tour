@@ -21,6 +21,7 @@ namespace Textures {
         Bear,
         TitleScreen,
         HealthRefill,
+        StudentUnion,
     };
 }
 

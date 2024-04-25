@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
+#include <string>
 
 namespace {
     static const sf::Vector2f SPAWN_POINT(2450.f, 850.f);
@@ -73,7 +74,7 @@ void World::update(sf::Time delta_time)
 
     // Handle Map collisions. If Player crosses a black border (how Map is 
     // designed), revert the previous movement command.
-    handle_map_collisions();
+    //handle_map_collisions();
 
     /** @remark UNUSED, no NPCs... */
     /// Remove all destroyed entities and create new ones.
@@ -109,12 +110,6 @@ CommandQueue& World::get_command_queue()
  */
 void World::load_textures()
 {
-    //m_textures.load(Textures::Grass, "textures/world/grass1.png");
-    m_textures.load(Textures::Map, "textures/world/occ-map-3-8192x7536.png");
-    // NOTE: also need to load this into an sf::Image, for map collision 
-    // checking
-    _map = m_textures.get(Textures::Map).copyToImage();
-
     m_textures.load(Textures::Player, "textures/player/pete-96px.png");
     m_textures.load(Textures::FireProjectile, "textures/player/player.png");
 
@@ -122,6 +117,15 @@ void World::load_textures()
     m_textures.load(Textures::Bear, "textures/player/player.png");
 
     m_textures.load(Textures::HealthRefill, "textures/player/player.png");
+
+    // Map assets:
+    m_textures.load(Textures::Grass, "textures/world/grass1.png");
+    m_textures.load(Textures::Map, "textures/world/occ-map-3-8192x7536.png");
+    // NOTE: also need to load this into an sf::Image, for map collision 
+    // checking
+    _map = m_textures.get(Textures::Map).copyToImage();
+
+    load_map(); 
 }
 
 void World::build_scene()
@@ -135,10 +139,9 @@ void World::build_scene()
     }
 
     // Prepare map background.
-    sf::Texture& texture = m_textures.get(Textures::Map);
+    sf::Texture& texture = m_textures.get(Textures::Grass);
     sf::IntRect texture_rect(m_world_bounds);
-    // NOT REPEATED...
-    //texture.setRepeated(true);
+    texture.setRepeated(true);
 
     // Add background sprite to the scene.
     std::unique_ptr<SpriteNode> background_sprite(new SpriteNode(
@@ -152,9 +155,32 @@ void World::build_scene()
     m_player_creature = player.get();
     m_player_creature->setPosition(m_player_spawn_point);
     m_scene_layers[Foreground]->attach_child(std::move(player));
+    
+    build_map();
 
     /** No NPCs... */
     //add_npcs();
+}
+
+void World::load_map()
+{
+    std::string world = "textures/world/";
+    m_textures.load(Textures::StudentUnion, world + "student-union.png");
+}
+
+void World::build_map()
+{
+    // SPAWN_POINT(2450.f, 850.f);
+    std::vector<std::string> assets = { "student_union", "another_thing" };
+    for (int i = 0; i < assets.size(); ++i) {
+        assets.at(0);
+    }
+ 
+    sf::Texture& texture = m_textures.get(Textures::StudentUnion);
+    std::unique_ptr<SpriteNode> student_union(new SpriteNode(
+                texture));
+    student_union->setPosition(SPAWN_POINT.x + 50.f, SPAWN_POINT.y + 50.f);
+    m_scene_layers[MapAssets]->attach_child(std::move(student_union));
 }
 
 void World::adapt_player_position()
@@ -467,6 +493,9 @@ void World::handle_collisions()
             auto& projectile = static_cast<Projectile&>(*pair.second);
             creature.damage(projectile.get_damage());
             projectile.destroy();
+        } else if (matches_categories(pair, Category::Player, 
+                                      Category::MapAssets)) {
+            m_player_creature->accelerate(sf::Vector2f(0.f, 0.f));
         }
     }
 }
