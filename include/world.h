@@ -78,7 +78,7 @@ private:
     void add_npc(Creature::Type type, sf::Vector2f& vec2_rel);
     void add_npcs();
     void spawn_npcs();
-    void add_map_asset(Creature::Type type, sf::Vector2f& vec2_rel);
+    void add_map_asset(Creature::Type type, sf::Vector2f& coord);
     void add_map_assets();
     void spawn_map_assets();
     void destroy_entities_outside_chunk();

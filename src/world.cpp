@@ -427,10 +427,8 @@ void World::destroy_entities_outside_chunk()
  * categories - Player/Pickup, Player/EnemyNpc, Player/EnemyProjectile,
  * PlayerProjectile/EnemyNpc.
  */
-bool matches_categories(SceneNode::Pair&     std::string world = "textures/world/";
-    m_textures.load(Textures::Grass, world + "grass1.png");
-    m_textures.load(Textures::StudentUnion, world + "student-union.png");colliders,
-        Category::Type type1, Category::Type type2)
+bool matches_categories(SceneNode::Pair& colliders, Category::Type type1, 
+                        Category::Type type2)
 {
     /// Colliders are stored in a pair, first and second are colliders.
     unsigned int category1 = colliders.first->get_category();
@@ -654,11 +652,14 @@ void World::handle_player_death()
     }
 }
 
-void World::add_map_asset(Creature::Type type, sf::Vector2f& vec2_rel)
+void World::add_map_asset(Creature::Type type, sf::Vector2f& coord)
 {   
-    sf::Vector2f rel(m_player_spawn_point.x + vec2_rel.x, 
-                     m_player_spawn_point.y + vec2_rel.y);
-    SpawnPoint spawn(type, rel);
+    // @note NOT relative to player!
+    //sf::Vector2f rel(m_player_spawn_point.x + vec2_rel.x, 
+    //                 m_player_spawn_point.y + vec2_rel.y);
+    
+    SpawnPoint spawn(type, coord);
+
     // after init spawn with enemy type and pos of spawn, push into spawn point
     // vec
     _map_asset_spawn_points.push_back(spawn);
