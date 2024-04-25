@@ -2,6 +2,7 @@
 #include "creature.h"
 #include "projectile.h"
 #include "pickup.h"
+#include "map-asset.h"
 
 // for std::bind() placeholders _1, _2, & so on...
 using namespace std::placeholders;
@@ -18,6 +19,10 @@ std::vector<CreatureData> initialize_creature_data()
     data[Creature::Player].attack_interval = sf::seconds(1);
 
     // ADDITIONAL CREATURE DATA...
+    data[Creature::StudentUnion].texture = Textures::StudentUnion;
+    data[Creature::StudentUnion].hitpoints = 100.f;
+    data[Creature::StudentUnion].speed = 0.f;
+    data[Creature::StudentUnion].attack_interval = sf::seconds(1);
 
     return data;
 }
@@ -55,6 +60,14 @@ std::vector<PickupData> initialize_pickup_data()
     // binds std::placeholder::_1 to first param of Creature::collect_ammunition,
     // and amt 3 to second param
     data[Pickup::Arrows].action = std::bind(&Creature::collect_ammunition, _1, 3); */
+
+    return data;
+}
+
+std::vector<MapAssetData> initialize_map_asset_data()
+{
+    std::vector<MapAssetData> data(MapAsset::TypeCount);
+    //data[MapAsset::Building].texture = Textures::MapAsset;
 
     return data;
 }

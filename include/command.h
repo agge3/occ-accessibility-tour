@@ -10,15 +10,18 @@
 class SceneNode;
 
 struct Command {
-    Command();
     // treat function as object
-    std::function<void(SceneNode& node, sf::Time dt)> action;
+    typedef std::function<void(SceneNode& node, sf::Time dt)> Action;
+
+    Command();
+
+    Action action;
     // store the recipients of the command in a category
     unsigned int category;
 };
 
 template <typename GameObject, typename Function>
-std::function<void(SceneNode&, sf::Time)> derived_action(Function fn)
+Command::Action derived_action(Function fn)
 {
     return [=] (SceneNode& node, sf::Time dt) {
         // check if cast is safe

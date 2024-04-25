@@ -2,7 +2,10 @@
 
 #include "creature.h"
 #include "data_tables.h"
+#include "command_queue.h"
 #include "utility.h"
+#include "pickup.h"
+#include "r_holders.h"
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -110,16 +113,19 @@ void Creature::update_current(sf::Time dt, CommandQueue& commands)
     if (is_destroyed()) {
         check_pickup_drop(commands);
         m_is_marked_for_removal = true;
-    } else {
-        /** @brief check_projectile_launch() to check if attack(s) should be
-         * updated. */
-        check_projectile_launch(dt, commands);
-        /** @brief Update Creature pathing and apply velocity. */
-        update_pathing(dt);
-        Entity::update_current(dt, commands);
-        /** @brief Update Creature texts. */
-        update_texts();
+        return;
     }
+
+    /** @brief check_projectile_launch() to check if attack(s) should be
+     * updated. */
+    check_projectile_launch(dt, commands);
+
+    /** @brief Update Creature pathing and apply velocity. */
+    update_pathing(dt);
+    Entity::update_current(dt, commands);
+
+    /** @brief Update Creature texts. */
+    update_texts(); 
 }
 
 void Creature::update_pathing(sf::Time dt)
@@ -188,13 +194,12 @@ Textures::ID to_texture_id(Creature::Type type)
  */
 unsigned int Creature::get_category() const
 {
-    /// Switch type of Creature to get Category.
-    switch (m_type) {
-    /// e.g. Set Creature::Player to Category::Player.
-    case Player:
+    /// Get type of Creature to get Category.
+    if (is_allied()) {
+        /// e.g. Set Creature::Player to Category::Player.
         return Category::Player;
-    default:
-        return Category::EnemyNpc;
+    } else {
+        return Category::MapAsset;
     }
 }
 
@@ -346,6 +351,16 @@ void Creature::create_pickup(SceneNode& node, const TextureHolder& textures)
 
     /// Attach pickup as child scene node on the scene graph.
     node.attach_child(std::move(pickup));
+}
+
+void Creature::create_map_asset(SceneNode& node, MapAsset::Type type,
+                                const TextureHolder& textures) const
+{
+    //const sf::Vector2f SPAWN_POINT(2450.f, 850.f);
+    ////auto type = static_cast<MapAsset::Type>(MapAsset::Building);
+    //std::unique_ptr<MapAsset> map_asset(new MapAsset(type, textures));
+    //map_asset->setPosition(SPAWN_POINT.x + 50.f, SPAWN_POINT.y + 50.f);
+    //std::cout << "Created MapAsset.\n";
 }
 
 // NOTE: To be revisited. Either delete or implement. Don't want to lose idea.

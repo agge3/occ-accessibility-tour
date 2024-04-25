@@ -1,9 +1,9 @@
 #pragma once
 
 #include "scene_node.h"
-/// Include command_queue.h in entity.h because all derived classes of Entity
-/// use CommandQueue.
-#include "command_queue.h"
+
+// xxx Include command_queue.h in entity.h because all derived classes of Entity
+// use CommandQueue.
 
 /**
  * @class Entity

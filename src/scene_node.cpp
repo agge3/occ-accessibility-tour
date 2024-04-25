@@ -75,6 +75,8 @@ void SceneNode::draw(sf::RenderTarget& target, sf::RenderStates states) const
     // draw derived obj with states calling draw_current, forward both parameters
     draw_current(target, states);
     draw_children(target, states);
+
+    draw_bounding_rect(target, states);
 }
 
 void SceneNode::draw_current(sf::RenderTarget&, sf::RenderStates) const
@@ -111,7 +113,7 @@ sf::Vector2f SceneNode::get_world_position() const
  */
 unsigned int SceneNode::get_category() const
 {
-    return Category::SceneGroundLayer;
+    return m_default_category;
 }
 
 void SceneNode::on_command(const Command& command, sf::Time dt)
@@ -140,7 +142,7 @@ void SceneNode::draw_bounding_rect(sf::RenderTarget& target,
     /// display as solid color rectangles.
     shape.setFillColor(sf::Color::Transparent);
     shape.setOutlineColor(sf::Color::Green);
-    shape.setOutlineThickness(1.f);
+    shape.setOutlineThickness(2.f);
 
     target.draw(shape);
 }
@@ -161,7 +163,7 @@ void SceneNode::check_node_collision(SceneNode& node,
         /// collision_pairs is a map containing nodes with collision - insert
         /// into map. std::minmax() orders the map so that pairs are in an
         /// expected order, and there's no duplicate pairs.
-        collision_pairs.insert(std::minmax(this, & node));
+        collision_pairs.insert(std::minmax(this, &node));
     }
     /// Recursively calls itself to iterate through all collision pairs for the
     /// calling node and its children.

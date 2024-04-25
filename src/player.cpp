@@ -24,8 +24,8 @@ struct PlayerMover {
         //    << movement.y << "y)\n";
         player.accelerate(movement);
         // uncomment to print current player velocity
-        std::cout << "Player velocity: (" << velocity.x * player.get_max_speed()
-            << ", " << velocity.y * player.get_max_speed() << ")\n";
+        //std::cout << "Player velocity: (" << velocity.x * player.get_max_speed()
+        //    << ", " << velocity.y * player.get_max_speed() << ")\n";
     }
     sf::Vector2f velocity;
 };
@@ -113,8 +113,8 @@ void Player::handle_realtime_input(CommandQueue& commands)
          * command. */
         if (sf::Keyboard::isKeyPressed(pair.first)
                 && is_realtime_action(pair.second)) {
-            // print detection of realtime input
-            std::cout << "Realtime input detected!\n";
+            // uncomment to print detection of realtime input
+            //std::cout << "Realtime input detected!\n";
             commands.push(m_actionbinding[pair.second]);
         }
     }
