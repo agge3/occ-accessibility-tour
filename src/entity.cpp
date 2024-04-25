@@ -2,6 +2,8 @@
 
 #include "entity.h"
 
+#include <cassert>
+
 void Entity::heal(float hitpoints)
 {
     /// Make sure hitpoints are greater than zero.

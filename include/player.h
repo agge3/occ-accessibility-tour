@@ -77,6 +77,7 @@ public:
     char* print_assigned_key(Action action) const;
     void run_stt();
     bool is_stt_running();
+
 private:
     void initialize_actions();
     static bool is_realtime_action(Action action);

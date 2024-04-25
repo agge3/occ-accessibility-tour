@@ -61,7 +61,7 @@ public:
     virtual bool is_marked_for_removal() const;
     virtual bool is_destroyed() const;
     void removal();
-    sf::FloatRect get_bounding_rect() const;
+    virtual sf::FloatRect get_bounding_rect() const;
 private:
     // to be overwritten by derived classes
     virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;

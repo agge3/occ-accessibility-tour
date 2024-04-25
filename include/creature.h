@@ -1,11 +1,11 @@
 #pragma once
 
 #include "entity.h"
-#include "r_holders.h"
-#include "text_node.h"
+#include "r_ids.h"
 #include "command.h"
 #include "projectile.h"
-#include "pickup.h"
+#include "text_node.h"
+#include "map-asset.h"
 
 #include <SFML/Graphics/Sprite.hpp>
 
@@ -17,8 +17,9 @@ public:
      * @enum Type
      * Type of Creature Entity.
      */
-    enum Type : unsigned int {
+    enum Type {
         Player,
+        StudentUnion,
         TypeCount,
     };
 
@@ -46,6 +47,8 @@ private:
             float x_offset, float y_offset, const TextureHolder& textures) const;
     void create_pickup(SceneNode& node, const TextureHolder& textures) const;
     void update_texts();
+    void create_map_asset(SceneNode& node, MapAsset::Type type, 
+                          const TextureHolder& textures) const;
 
     Type m_type;
     sf::Sprite m_sprite;

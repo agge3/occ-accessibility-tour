@@ -1,5 +1,8 @@
 #include "world.h"
 #include "player.h"
+#include "projectile.h"
+#include "pickup.h"
+#include "text_node.h"
 
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
@@ -9,6 +12,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <limits>
 
 namespace {
     static const sf::Vector2f SPAWN_POINT(2450.f, 850.f);
@@ -39,12 +43,14 @@ World::World(sf::RenderWindow& window, FontHolder& fonts) :
     //        m_world_bounds.height / 2.f)
     
     // spawn player at designated spawn point
-    m_player_spawn_point(SPAWN_POINT.x, SPAWN_POINT.y)
+    m_player_spawn_point(SPAWN_POINT.x, SPAWN_POINT.y),
 
     // npcs fifth ->
     /* Don't need npcs...
      * m_npc_spawn_points(),
      * m_active_npcs() */
+
+    _map_asset_spawn_points()
 {
         load_textures();
         build_scene();
@@ -79,8 +85,9 @@ void World::update(sf::Time delta_time)
     /** @remark UNUSED, no NPCs... */
     /// Remove all destroyed entities and create new ones.
     //m_scene_graph.removal();
-    handle_player_death();
+    //handle_player_death();
     //spawn_npcs();
+    spawn_map_assets();
 
     /// Regular game update step, adapt player position (correct even though
     /// outside view, because adapt_player_position() handles appropriately).
@@ -111,28 +118,37 @@ CommandQueue& World::get_command_queue()
 void World::load_textures()
 {
     m_textures.load(Textures::Player, "textures/player/pete-96px.png");
-    m_textures.load(Textures::FireProjectile, "textures/player/player.png");
+    //m_textures.load(Textures::FireProjectile, "textures/player/player.png");
 
-    m_textures.load(Textures::Bunny, "textures/player/player.png");
-    m_textures.load(Textures::Bear, "textures/player/player.png");
+    //m_textures.load(Textures::Bunny, "textures/player/player.png");
+    //m_textures.load(Textures::Bear, "textures/player/player.png");
 
-    m_textures.load(Textures::HealthRefill, "textures/player/player.png");
+    //m_textures.load(Textures::HealthRefill, "textures/player/player.png");
 
     // Map assets:
-    m_textures.load(Textures::Grass, "textures/world/grass1.png");
-    m_textures.load(Textures::Map, "textures/world/occ-map-3-8192x7536.png");
+    //m_textures.load(Textures::Map, "textures/world/occ-map-3-8192x7536.png");
     // NOTE: also need to load this into an sf::Image, for map collision 
     // checking
-    _map = m_textures.get(Textures::Map).copyToImage();
+    //_map = m_textures.get(Textures::Map).copyToImage();
+    //
 
     load_map(); 
+}
+
+void World::load_map()
+{
+    std::string world = "textures/world/";
+    m_textures.load(Textures::Grass, world + "grass1.png");
+    m_textures.load(Textures::StudentUnion, world + "student-union.png");
 }
 
 void World::build_scene()
 {
     /// Initialize all the different scene layers.
     for(std::size_t i = 0; i < LayerCount; ++i) {
-        SceneNode::Ptr layer(new SceneNode());
+        Category::Type category = 
+            (i == Foreground) ? Category::SceneGroundLayer : Category::None;
+        SceneNode::Ptr layer(new SceneNode(category));
         m_scene_layers[i] = layer.get();
 
         m_scene_graph.attach_child(std::move(layer));
@@ -156,18 +172,18 @@ void World::build_scene()
     m_player_creature->setPosition(m_player_spawn_point);
     m_scene_layers[Foreground]->attach_child(std::move(player));
     
-    build_map();
+    //build_map();
 
     /** No NPCs... */
     //add_npcs();
+    
+    add_map_assets();
 }
 
-void World::load_map()
-{
-    std::string world = "textures/world/";
-    m_textures.load(Textures::StudentUnion, world + "student-union.png");
-}
-
+/**
+ * @warning Not implemented.
+ * @todo Implement.
+ */
 void World::build_map()
 {
     // SPAWN_POINT(2450.f, 850.f);
@@ -176,11 +192,11 @@ void World::build_map()
         assets.at(0);
     }
  
-    sf::Texture& texture = m_textures.get(Textures::StudentUnion);
-    std::unique_ptr<SpriteNode> student_union(new SpriteNode(
-                texture));
-    student_union->setPosition(SPAWN_POINT.x + 50.f, SPAWN_POINT.y + 50.f);
-    m_scene_layers[MapAssets]->attach_child(std::move(student_union));
+    //sf::Texture& texture = m_textures.get(Textures::StudentUnion);
+    //_map_asset_command.category = Category::MapAsset;
+    //_map_asset_command.action = [this, &texture] (SceneNode& node, sf::Time) {
+    //    create_map_asset(node, texture);
+    //};
 }
 
 void World::adapt_player_position()
@@ -411,23 +427,26 @@ void World::destroy_entities_outside_chunk()
  * categories - Player/Pickup, Player/EnemyNpc, Player/EnemyProjectile,
  * PlayerProjectile/EnemyNpc.
  */
-bool World::matches_categories(SceneNode::Pair& colliders,
-        Category::Type type1, Category::Type type2) const
+bool matches_categories(SceneNode::Pair&     std::string world = "textures/world/";
+    m_textures.load(Textures::Grass, world + "grass1.png");
+    m_textures.load(Textures::StudentUnion, world + "student-union.png");colliders,
+        Category::Type type1, Category::Type type2)
 {
     /// Colliders are stored in a pair, first and second are colliders.
     unsigned int category1 = colliders.first->get_category();
     unsigned int category2 = colliders.second->get_category();
     // can perform bitwise comparison because unsigned ints
-    if (type1 & category1 && type2 & category2)
+    if (type1 & category1 && type2 & category2) {
         return true;
-    else if (type1 & category2 && type2 & category1) {
+    } else if (type1 & category2 && type2 & category1) {
         // still a match! just not in expected order
         /// If not in expected order, swap pair so that it is in expected order,
         /// also return true because the colliders match the expected types.
         std::swap(colliders.first, colliders.second);
         return true;
-    } else
+    } else {
         return false;
+    }
 }
 
 /**
@@ -466,37 +485,75 @@ void World::handle_collisions()
     for (SceneNode::Pair pair : collision_pairs) {
         /// For Player/Pickup, apply the pickup to the player and destroy the
         /// pickup.
-        if (matches_categories(pair, Category::Player, Category::PlayerPickup)) {
-            // static cast the pair's type to the expected type to make sure
-            // (safe because the pair's type is expected to match), and create
-            // local variables storing each - to work with.
+        //if (matches_categories(pair, Category::Player, Category::PlayerPickup)) {
+        //    // static cast the pair's type to the expected type to make sure
+        //    // (safe because the pair's type is expected to match), and create
+        //    // local variables storing each - to work with.
+        //    auto& player = static_cast<Creature&>(*pair.first);
+        //    auto& pickup = static_cast<Pickup&>(*pair.second);
+        //    pickup.apply(player);
+        //    pickup.destroy();
+        //} else if (matches_categories(pair, Category::Player,
+        //            Category::EnemyNpc)) {
+        //    /// For Player/EnemyNpc, damage the player and destroy the enemy.
+        //    auto& player = static_cast<Creature&>(*pair.first);
+        //    auto& enemy = static_cast<Creature&>(*pair.second);
+        //    player.damage(enemy.get_hitpoints());
+        //    enemy.destroy();
+        //} else if (matches_categories(pair, Category::Player,
+        //            Category::EnemyProjectile)
+        //            || matches_categories(pair, Category::PlayerProjectile,
+        //            Category::EnemyNpc)) {
+        //    /// For Player/EnemyProjectile and PlayerProjectile/EnemyNpc
+        //    /// (handled the same because projectiles are to be handled the same,
+        //    /// regardless of recipient), damage the recipient and destroy the
+        //    /// projectile.
+        //    auto& creature = static_cast<Creature&>(*pair.first);
+        //    auto& projectile = static_cast<Projectile&>(*pair.second);
+        //    creature.damage(projectile.get_damage());
+        //    projectile.destroy();
+        if (matches_categories(pair, Category::Player, 
+                                      Category::MapAsset)) {
+            std::cout << "Collision with MapAsset detected!\n";
+
             auto& player = static_cast<Creature&>(*pair.first);
-            auto& pickup = static_cast<Pickup&>(*pair.second);
-            pickup.apply(player);
-            pickup.destroy();
-        } else if (matches_categories(pair, Category::Player,
-                    Category::EnemyNpc)) {
-            /// For Player/EnemyNpc, damage the player and destroy the enemy.
-            auto& player = static_cast<Creature&>(*pair.first);
-            auto& enemy = static_cast<Creature&>(*pair.second);
-            player.damage(enemy.get_hitpoints());
-            enemy.destroy();
-        } else if (matches_categories(pair, Category::Player,
-                    Category::EnemyProjectile)
-                    || matches_categories(pair, Category::PlayerProjectile,
-                    Category::EnemyNpc)) {
-            /// For Player/EnemyProjectile and PlayerProjectile/EnemyNpc
-            /// (handled the same because projectiles are to be handled the same,
-            /// regardless of recipient), damage the recipient and destroy the
-            /// projectile.
-            auto& creature = static_cast<Creature&>(*pair.first);
-            auto& projectile = static_cast<Projectile&>(*pair.second);
-            creature.damage(projectile.get_damage());
-            projectile.destroy();
-        } else if (matches_categories(pair, Category::Player, 
-                                      Category::MapAssets)) {
-            m_player_creature->accelerate(sf::Vector2f(0.f, 0.f));
-        }
+            auto& map = static_cast<Creature&>(*pair.second);
+
+            sf::FloatRect pbound = player.get_bounding_rect();
+            float pbound_right = (pbound.left + pbound.width);
+            float pbound_bottom = pbound.top + pbound.height;
+            
+            sf::FloatRect mbound = map.get_bounding_rect();
+            float mbound_right = mbound.left + mbound.width;
+            float mbound_bottom = mbound.top + mbound.height;
+
+            sf::Vector2f pvel = player.get_velocity();
+
+            // left-side collision
+            if (pbound.left <= mbound_right) {
+                float overlap = mbound_right - pbound.left;
+                pvel.x -= overlap;
+                player.set_velocity(pvel);
+            }
+            // right-side collision
+            if (pbound_right >= mbound.left) {
+                float overlap = pbound_right - mbound.left;
+                pvel.x += overlap;
+                player.set_velocity(pvel);
+            }
+            // bottom-up collision
+            if (pbound.top <= mbound_bottom) {
+                float overlap = mbound_bottom - pbound.top; 
+                pvel.y -= overlap;
+                player.set_velocity(pvel);
+            }
+            // top-down collision
+            if (pbound_bottom >= mbound.top) {
+                float overlap = pbound_bottom - mbound.top;
+                pvel.y += overlap;
+                player.set_velocity(pvel);
+            }
+        }   
     }
 }
 
@@ -596,3 +653,67 @@ void World::handle_player_death()
         m_scene_layers[Foreground]->attach_child(std::move(player));
     }
 }
+
+void World::add_map_asset(Creature::Type type, sf::Vector2f& vec2_rel)
+{   
+    sf::Vector2f rel(m_player_spawn_point.x + vec2_rel.x, 
+                     m_player_spawn_point.y + vec2_rel.y);
+    SpawnPoint spawn(type, rel);
+    // after init spawn with enemy type and pos of spawn, push into spawn point
+    // vec
+    _map_asset_spawn_points.push_back(spawn);
+    std::cout << spawn.type << " added to MapAsset spawn points" << std::endl;
+}
+
+void World::add_map_assets()
+{
+    sf::Vector2f student_union(1000.f, 1000.f);
+    add_map_asset(Creature::StudentUnion, student_union);
+    
+    // uncomment to print success
+    //std::cout << "MapAsset Creature added.\n";
+}
+
+void World::spawn_map_assets() {
+    while (!_map_asset_spawn_points.empty()) {
+        SpawnPoint spawn = _map_asset_spawn_points.back();
+        std::unique_ptr<Creature> map_asset(
+                new Creature(spawn.type, m_textures, m_fonts));
+        map_asset->setPosition(spawn.vec2.x, spawn.vec2.y);
+
+        // print success and pos for confirmation
+        std::cout << spawn.type << " spawned in the world!" << " ("
+            << std::setprecision(0) << spawn.vec2.x << ", " << spawn.vec2.y
+            << ")\n";
+    
+        m_scene_layers[Foreground]->attach_child(std::move(map_asset));
+        _map_asset_spawn_points.pop_back();
+    }
+}
+
+//void World::spawn_map_assets() {
+//    // if npc spawn points vector is not empty...
+//    if (!_map_asset_spawn_points.empty()) {
+//        // iter through each spawn point and spawn
+//        for (auto iter = _map_asset_spawn_points.rbegin();
+//                iter != _map_asset_spawn_points.rend(); ++iter) {
+//            // init SpawnPoint AFTER check to not create unneccesary structs
+//            SpawnPoint spawn = *iter;
+//            // create smart ptr to spawn npc on heap
+//            std::unique_ptr<Creature> map_asset(
+//                    new Creature(spawn.type, m_textures, m_fonts));
+//            // set enemy pos to spawn pos
+//            map_asset->setPosition(spawn.vec2.x, spawn.vec2.y);
+//            // print success and pos for confirmation
+//            std::cout << spawn.type << " spawned in the world!" << " ("
+//                << std::setprecision(0) << spawn.vec2.x << ", " << spawn.vec2.y
+//                << ")\n";
+//
+//            // bind to foreground layer
+//            m_scene_layers[Foreground]->attach_child(std::move(map_asset));
+//            // riter, so pop_back end and "increment" backwards (moving to begin
+//            // until vector is empty and all spawn points have been spawned)
+//            m_npc_spawn_points.pop_back();
+//        }
+//    }
+//}

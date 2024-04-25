@@ -9,8 +9,6 @@
 #include "creature.h"
 #include "command_queue.h"
 #include "command.h"
-#include "pickup.h"
-#include "projectile.h"
 
 #include <SFML/System/NonCopyable.hpp>
 #include <SFML/Graphics/View.hpp>
@@ -56,7 +54,6 @@ private:
     enum Layer {
         Background,
         Map,
-        MapAssets,
         Foreground,
         LayerCount
     };
@@ -78,13 +75,14 @@ private:
 	void adapt_player_position();
 	void adapt_player_velocity();
     void handle_collisions();
-    void add_npcs();
     void add_npc(Creature::Type type, sf::Vector2f& vec2_rel);
+    void add_npcs();
     void spawn_npcs();
+    void add_map_asset(Creature::Type type, sf::Vector2f& vec2_rel);
+    void add_map_assets();
+    void spawn_map_assets();
     void destroy_entities_outside_chunk();
     // void guide_projectiles();
-    bool matches_categories(SceneNode::Pair& colliders, Category::Type type1,
-            Category::Type type2) const;
     sf::FloatRect get_view_bounds() const;
     sf::FloatRect get_chunk_bounds() const;
     void handle_map_collisions();
@@ -92,6 +90,7 @@ private:
     void handle_player_death();
     void load_map();
     void build_map();
+
 
     sf::RenderWindow& m_window;
     sf::View m_world_view;
@@ -111,6 +110,7 @@ private:
     std::vector<SpawnPoint> m_npc_spawn_points;
     /// Holds Ptr to all active NPCs.
     std::vector<Creature*> m_active_npcs;
+    std::vector<SpawnPoint> _map_asset_spawn_points;
 
     /**
     * @var sf::Image _map
@@ -121,3 +121,7 @@ private:
     */
     sf::Image _map;
 };
+
+// xxx what scope (?)
+//bool matches_categories(SceneNode::Pair& colliders, Category::Type type1,
+//                   Category::Type type2);

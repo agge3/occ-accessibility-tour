@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include "entity.h"
 #include "r_ids.h"
 
 #include <SFML/System/Time.hpp>
@@ -53,6 +52,11 @@ struct PickupData {
     Textures::ID texture;
 };
 
+struct MapAssetData {
+    Textures::ID texture;
+};
+
 std::vector<CreatureData> initialize_creature_data();
 std::vector<ProjectileData> initialize_projectile_data();
 std::vector<PickupData> initialize_pickup_data();
+std::vector<MapAssetData> initialize_map_asset_data();

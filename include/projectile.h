@@ -18,7 +18,7 @@ public:
        EnemyFire,
        TypeCount,
     };
-
+      
     Projectile(Type type, const TextureHolder& textures);
     void guide_torwards(sf::Vector2f position);
     bool is_guided() const;

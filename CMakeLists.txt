@@ -73,6 +73,7 @@ target_sources(occ-accessibility-tour PRIVATE src/main.cpp
     src/projectile.cpp
     src/pickup.cpp
     src/task-thread.cpp
+    src/map-asset.cpp
     # compile stt into occ-accessibility tour
     stt/src/speech-to-text.cpp
     # imgui style config
