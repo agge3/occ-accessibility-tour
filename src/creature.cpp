@@ -11,6 +11,8 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <ostream>
+#include <iomanip>
 
 /// Anonymous namespace to avoid name collisions in other files - store Creature
 /// data TABLE local to Creature.
@@ -214,13 +216,26 @@ bool Creature::is_marked_for_removal() const
 
 void Creature::update_texts()
 {
-    // catting str with '+'...?
-    m_health_display->set_string(std::to_string(get_hitpoints()) + " HP");
+    // set hp precision to .0f - looks better
+    float hp = get_hitpoints();
+    std::string hp_string;
+
+    // scoped to avoid potential oss collisions
+    {
+        std::ostringstream oss;
+        oss << std::setprecision(0) << std::fixed << hp 
+            << " days left in semester";
+        hp_string = oss.str();
+    }
+
+    m_health_display->set_string(hp_string);
     // print success to make sure this is only done once!
-    std::cout << "Update texts: Health display text set ... success!\n"
+    //std::cout << "Update texts: Health display text set ... success!\n"
         // and shows the correct string...
-        << "Text: " << std::to_string(get_hitpoints()) << " HP\n";
-    m_health_display->setPosition(0.f, 50.f);
+        //<< "Text: " << std::to_string(get_hitpoints()) << " HP\n";
+    
+    m_health_display->set_fill_color(0, 0, 0); // rgb(red)
+    m_health_display->setPosition(0.f, 60.f);
     // -rotation negates any rotation of creature and keeps text upright
     m_health_display->setRotation(-getRotation());
 }
@@ -332,3 +347,15 @@ void Creature::create_pickup(SceneNode& node, const TextureHolder& textures)
     /// Attach pickup as child scene node on the scene graph.
     node.attach_child(std::move(pickup));
 }
+
+// NOTE: To be revisited. Either delete or implement. Don't want to lose idea.
+///**
+//* @param sf::Vector2f empty, pass an empty sf::Vector2f and it will be modified
+//* to contain last Player movement.
+//* @return void, so function cannot be misused.
+//* @note ONLY for Player movement, to revert last movement.
+//*/
+//void Creature::get_last_movement(sf::Vector2f pmov) const
+//{
+//    if (Category::Player)
+//}

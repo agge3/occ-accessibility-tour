@@ -34,6 +34,7 @@ public:
     bool is_allied() const;
     float get_max_speed() const;
     void attack();
+    sf::Vector2f get_last_movement() const;
 private:
     virtual void draw_current(sf::RenderTarget& target, sf::RenderStates states)
         const;

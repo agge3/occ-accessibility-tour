@@ -53,7 +53,7 @@ Application::Application() :
     // load main font
     m_fonts.load(Fonts::Main, "fonts/Hack-Regular.ttf");
     // load title screen
-    m_textures.load(Textures::TitleScreen, "textures/title/welcome_to_gaem.png");
+    m_textures.load(Textures::TitleScreen, "textures/title/main-menu.png");
 
     register_states();
     m_state_stack.push_state(States::Title);

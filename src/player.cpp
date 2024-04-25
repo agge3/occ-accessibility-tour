@@ -1,6 +1,7 @@
 #include "player.h"
 #include "command_queue.h"
 #include "creature.h"
+#include "task-thread.h"
 
 #include <map>
 #include <string>
@@ -10,11 +11,18 @@
 
 using namespace std::placeholders;
 
+sf::Vector2f PREV_PLAYER_MOVEMENT(0.f, 0.f);
+
 struct PlayerMover {
     PlayerMover(float vx, float vy) : velocity(vx, vy) {}
     void operator() (Creature& player, sf::Time) const
     {
-        player.accelerate(velocity * player.get_max_speed());
+        sf::Vector2f movement(velocity * player.get_max_speed());
+        PREV_PLAYER_MOVEMENT = movement;
+        // uncomment to print previous player movement
+        //std::cout << "Previous Player movement: (" << movement.x << "x, " 
+        //    << movement.y << "y)\n";
+        player.accelerate(movement);
         // uncomment to print current player velocity
         std::cout << "Player velocity: (" << velocity.x * player.get_max_speed()
             << ", " << velocity.y * player.get_max_speed() << ")\n";
@@ -26,9 +34,11 @@ struct PlayerMover {
  * @note Default LevelStatus of Player is InProgress. Initialized in default
  * constructor.
  */
-Player::Player() : m_current_level_status(InProgress)
+Player::Player() : 
+    m_current_level_status(InProgress),     
+    _stt(std::make_unique<stt::SpeechToText>())
 {
-    /// Try to set initial keybindings.
+    /// Try to set default keyboard keybindings.
     try {
         m_keybinding[sf::Keyboard::Up] = MoveUp;
         std::cout << "Player keybind: Move up = Up arrow\n";
@@ -41,13 +51,40 @@ Player::Player() : m_current_level_status(InProgress)
 
         // attack actions...
         m_keybinding[sf::Keyboard::Space] = MagicAttack;
-        // set inital actionbindings
+    } catch (std::exception& e) {
+        /// Catch exception and print error message.
+        std::cerr << "\n EXCEPTION: " << e.what() <<
+            ". Failed to set default player keyboard keybindings.\n" 
+            << std::endl;
+    }
+
+    /// Try to set default SpeechToText keybindings.
+    try {
+        _sttbinding[stt::Key::Up] = MoveUp;
+        std::cout << "Player keybind: Move up = SpeechToText \"Up\"\n";
+        _sttbinding[stt::Key::Down] = MoveDown;
+        std::cout << "Player keybind: Move down = SpeechToText \"Down\"\n";
+        _sttbinding[stt::Key::Left] = MoveLeft;
+        std::cout << "Player keybind: Move left = SpeechToText \"Left\"\n";
+        _sttbinding[stt::Key::Right] = MoveRight;
+        std::cout << "Player keybind: Move right = SpeechToText \"Right\"\n";
+
+    } catch (std::exception& e) {
+        /// Catch exception and print error message.
+        std::cerr << "\n EXCEPTION: " << e.what() <<
+            ". Failed to set default player SpeechToText keybindings." 
+            << std::endl;
+    }
+
+    /** Try to initialize default keybindings. */
+    try {
         initialize_actions();
     } catch (std::exception& e) {
         /// Catch exception and print error message.
         std::cerr << "\n EXCEPTION: " << e.what() <<
-            ". Failed to initialize default player keybinds" << std::endl;
+            ". Failed to initialize default player keybindings." << std::endl;
     }
+
     /** @brief All categories assigned to Player Creature. */
     for (auto& pair : m_actionbinding) {
         // uncomment to print successful action category assigned to player
@@ -79,6 +116,20 @@ void Player::handle_realtime_input(CommandQueue& commands)
             // print detection of realtime input
             std::cout << "Realtime input detected!\n";
             commands.push(m_actionbinding[pair.second]);
+        }
+    }
+}
+
+void Player::handle_stt_input(CommandQueue& commands)
+{
+    if (!_stt->key_queue_is_empty()) {
+        _stt_key = _stt->get_key();
+        for (auto pair : _sttbinding) {
+            if (_stt_key == pair.first && is_realtime_action(pair.second)) {
+                // print detection of stt input
+                std::cout << "Speech to text input detected!\n";
+                commands.push(m_actionbinding[pair.second]);
+            }
         }
     }
 }
@@ -123,18 +174,33 @@ char* Player::print_assigned_key(Action action) const
 void Player::initialize_actions() {
     /** @brief Movement commands increment and decrement player speed. */
     // @note y-axis up/down pos/neg is inverse!
+    // @note 5.f is IDEAL!
 	m_actionbinding[MoveUp].action = derived_action<Creature>(
-            PlayerMover(0.f, -1.f));
+            PlayerMover(0.f, -5.f));
     std::cout << "Player action initialized: Move up\n";
 	m_actionbinding[MoveDown].action = derived_action<Creature>(
-            PlayerMover(0.f, +1.f));
+            PlayerMover(0.f, +5.f));
     std::cout << "Player action initialized: Move down\n";
     m_actionbinding[MoveLeft].action = derived_action<Creature>(
-            PlayerMover(-1.f, 0.f));
+            PlayerMover(-5.f, 0.f));
     std::cout << "Player action initialized: Move left\n";
 	m_actionbinding[MoveRight].action = derived_action<Creature>(
-            PlayerMover(+1.f, 0.f));
+            PlayerMover(+5.f, 0.f));
     std::cout << "Player action initialized: Move right\n";
+	
+    // STT actions:
+    m_actionbinding[STTMoveUp].action = derived_action<Creature>(
+            PlayerMover(0.f, -150.f));
+    std::cout << "Player SpeechToText action initialized: Move up\n";
+	m_actionbinding[STTMoveDown].action = derived_action<Creature>(
+            PlayerMover(0.f, +150.f));
+    std::cout << "Player SpeechToText action initialized: Move down\n";
+    m_actionbinding[STTMoveLeft].action = derived_action<Creature>(
+            PlayerMover(-150.f, 0.f));
+    std::cout << "Player SpeechToText action initialized: Move left\n";
+	m_actionbinding[STTMoveRight].action = derived_action<Creature>(
+            PlayerMover(+150.f, 0.f));
+    std::cout << "Player SpeechToText action initialized: Move right\n";
 
     // attack actions...
     // std::bind binds the para "_1" to always be the para for &attack ...
@@ -160,6 +226,10 @@ bool Player::is_realtime_action(Action action)
     case MoveLeft:
     case MoveRight:
     case MagicAttack:
+    case STTMoveUp:
+    case STTMoveDown:
+    case STTMoveLeft:
+    case STTMoveRight:
         return true;
         break;
     // if not explicitly defined as real-time, return false -> don't handle
@@ -185,4 +255,17 @@ void Player::set_level_status(LevelStatus status)
 Player::LevelStatus Player::get_level_status() const
 {
     return m_current_level_status;
+}
+
+void Player::run_stt()
+{
+    _stt_task.async([this]() { _stt->run(); });
+}
+
+bool Player::is_stt_running()
+{
+    if (!_stt_task.async_is_finished())
+        return true;
+
+    return false;
 }

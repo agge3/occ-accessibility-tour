@@ -14,12 +14,14 @@ namespace Textures {
      */
     enum ID {
         Player,
+        Map,
         Grass,
         FireProjectile,
         Bunny,
         Bear,
         TitleScreen,
         HealthRefill,
+        StudentUnion,
     };
 }
 

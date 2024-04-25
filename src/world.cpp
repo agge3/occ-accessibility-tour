@@ -1,11 +1,18 @@
-#include <world.h>
+#include "world.h"
+#include "player.h"
 
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <iomanip>
+#include <string>
+
+namespace {
+    static const sf::Vector2f SPAWN_POINT(2450.f, 850.f);
+}
 
 World::World(sf::RenderWindow& window, FontHolder& fonts) :
     // initialize all parts of the world correctly
@@ -20,16 +27,19 @@ World::World(sf::RenderWindow& window, FontHolder& fonts) :
 
     // world third ->
     // set the size of the world
-    m_world_bounds(0.f, 0.f, 5000.f, 5000.f),
-    // set player view to be zoomed in, keeping aspect ratio
-    m_world_view(sf::FloatRect(0.f, 0.f, 480.f, 270.f)),
+    m_world_bounds(0.f, 0.f, 8192.f, 7536.f),
+    // set player view to be zoomed in, keeping aspect ratio - 1.78
+    m_world_view(sf::FloatRect(0.f, 0.f, 1366.f, 768.f)),
     m_scroll_speed(0.f),
 
     // player fourth ->
     m_player_creature(nullptr),
     // spawn player in the center of the world
-    m_player_spawn_point(m_world_bounds.width / 2.f,
-            m_world_bounds.height / 2.f)
+    //m_player_spawn_point(m_world_bounds.width / 2.f,
+    //        m_world_bounds.height / 2.f)
+    
+    // spawn player at designated spawn point
+    m_player_spawn_point(SPAWN_POINT.x, SPAWN_POINT.y)
 
     // npcs fifth ->
     /* Don't need npcs...
@@ -59,18 +69,24 @@ void World::update(sf::Time delta_time)
     adapt_player_velocity();
 
     /// Constantly update collision detection and response (WARNING: May destroy
-    /// entities).
+    /// Entity(ies).
     handle_collisions();
+
+    // Handle Map collisions. If Player crosses a black border (how Map is 
+    // designed), revert the previous movement command.
+    //handle_map_collisions();
 
     /** @remark UNUSED, no NPCs... */
     /// Remove all destroyed entities and create new ones.
-    /* m_scene_graph.removal();
-    spawn_npcs(); */
+    //m_scene_graph.removal();
+    handle_player_death();
+    //spawn_npcs();
 
     /// Regular game update step, adapt player position (correct even though
     /// outside view, because adapt_player_position() handles appropriately).
     m_scene_graph.update(delta_time, m_command_queue);
     adapt_player_position();
+    handle_map_edges();
 }
 
 void World::draw()
@@ -94,15 +110,22 @@ CommandQueue& World::get_command_queue()
  */
 void World::load_textures()
 {
-    m_textures.load(Textures::Grass, "textures/world/grass1.png");
-
-    m_textures.load(Textures::Player, "textures/player/player.png");
+    m_textures.load(Textures::Player, "textures/player/pete-96px.png");
     m_textures.load(Textures::FireProjectile, "textures/player/player.png");
 
     m_textures.load(Textures::Bunny, "textures/player/player.png");
     m_textures.load(Textures::Bear, "textures/player/player.png");
 
     m_textures.load(Textures::HealthRefill, "textures/player/player.png");
+
+    // Map assets:
+    m_textures.load(Textures::Grass, "textures/world/grass1.png");
+    m_textures.load(Textures::Map, "textures/world/occ-map-3-8192x7536.png");
+    // NOTE: also need to load this into an sf::Image, for map collision 
+    // checking
+    _map = m_textures.get(Textures::Map).copyToImage();
+
+    load_map(); 
 }
 
 void World::build_scene()
@@ -115,7 +138,7 @@ void World::build_scene()
         m_scene_graph.attach_child(std::move(layer));
     }
 
-    // Prepare tiled background.
+    // Prepare map background.
     sf::Texture& texture = m_textures.get(Textures::Grass);
     sf::IntRect texture_rect(m_world_bounds);
     texture.setRepeated(true);
@@ -132,48 +155,97 @@ void World::build_scene()
     m_player_creature = player.get();
     m_player_creature->setPosition(m_player_spawn_point);
     m_scene_layers[Foreground]->attach_child(std::move(player));
+    
+    build_map();
 
     /** No NPCs... */
     //add_npcs();
 }
 
+void World::load_map()
+{
+    std::string world = "textures/world/";
+    m_textures.load(Textures::StudentUnion, world + "student-union.png");
+}
+
+void World::build_map()
+{
+    // SPAWN_POINT(2450.f, 850.f);
+    std::vector<std::string> assets = { "student_union", "another_thing" };
+    for (int i = 0; i < assets.size(); ++i) {
+        assets.at(0);
+    }
+ 
+    sf::Texture& texture = m_textures.get(Textures::StudentUnion);
+    std::unique_ptr<SpriteNode> student_union(new SpriteNode(
+                texture));
+    student_union->setPosition(SPAWN_POINT.x + 50.f, SPAWN_POINT.y + 50.f);
+    m_scene_layers[MapAssets]->attach_child(std::move(student_union));
+}
+
 void World::adapt_player_position()
 {
     /// Initialize view bounds to world view.
-  	sf::FloatRect view_bounds(m_world_view.getCenter()
-            - m_world_view.getSize() / 2.f, m_world_view.getSize());
+    // 1st param, top left: center - (size / 2)
+  	sf::FloatRect view(m_world_view.getCenter()
+            - (m_world_view.getSize() / 2.f), m_world_view.getSize());
     /// Initialize distance from "border" (before view pan).
     // what distance from border before panning view? 16.f = 16px
-	constexpr float border_distance = 16.f;
+	constexpr float border = 16.f;
 
     /// Initialize position to player position.
-	sf::Vector2f position = m_player_creature->getPosition();
+	sf::Vector2f pos = m_player_creature->getPosition();
 
-	// pos.x = pos.x || (0x + border_dist, y), if pos.x <= pan neg to the left
-    // on the x-axis
-    if (position.x = std::max(position.x, view_bounds.left + border_distance),
-            position.x <= view_bounds.left + border_distance)
-        // pan half distance of view bounds (world view)
-        m_world_view.move(-(view_bounds.width / 2), 0.f);
-    // (WIDTHx - border_dist, y), if pos.x >= pan pos to the right on the x-asis
-    if (position.x = std::min(position.x,
-            view_bounds.left + view_bounds.width - border_distance),
-            position.x >= view_bounds.left + view_bounds.width - border_distance)
-        m_world_view.move(view_bounds.width / 2, 0.f);
+    // numbers for map pan calculations
+    float x_range = m_world_bounds.width;
+    float y_range = m_world_bounds.height;
+
+	// if pos.x <= pan neg to the left on the x-axis
+    if (pos.x <= view.left + border) {
+        if (m_world_view.getCenter().x - view.width <= 0) {
+            float edge = abs(m_world_view.getCenter().x - view.width);
+            m_world_view.move(-(view.width / 2.f) + edge, 0.f);
+        } else {
+            // pan half distance of view bounds (world view)
+            m_world_view.move(-(view.width / 2.f), 0.f);
+        }
+    }
+
+    // if pos.x >= pan pos to the right on the x-axis
+    if (pos.x >= view.left + view.width - border) {
+        if (m_world_view.getCenter().x + view.width >= x_range) {
+            float edge = m_world_view.getCenter().x + view.width - x_range;
+            m_world_view.move((view.width / 2.f) - edge, 0.f);
+        } else {
+            m_world_view.move(view.width / 2.f, 0.f);
+        }
+    }
+
     // same as x-axis, for y-axis
-    if (position.y = std::max(position.y, view_bounds.top + border_distance),
-            position.y <= view_bounds.top + border_distance)
-        m_world_view.move(0.f, -(view_bounds.height / 2));
-	if (position.y = std::min(position.y,
-            view_bounds.top + view_bounds.height - border_distance),
-            position.y >= view_bounds.top + view_bounds.height - border_distance)
-        m_world_view.move(0.f, view_bounds.height / 2);
+    if (pos.y <= view.top + border) {
+        if (m_world_view.getCenter().y - view.height <= 0) {
+            float edge = abs(m_world_view.getCenter().y - view.height);
+            m_world_view.move(0.f, -(view.height / 2.f) + edge);
+        } else {
+            m_world_view.move(0.f, -(view.height / 2.f));
+        }
+    }
+
+	if (pos.y >= view.top + view.height - border) {
+        if (m_world_view.getCenter().y + view.height >= y_range) {
+            float edge = m_world_view.getCenter().y + view.height - y_range;
+            // -1 is magic number, seg faulting when crossing y max boundary!
+            m_world_view.move(0.f, (view.height / 2.f) - edge - 1);
+        } else {
+            m_world_view.move(0.f, view.height / 2.f);
+        }
+    }
 
     /// Set player position to current position.
-	m_player_creature->setPosition(position);
+	m_player_creature->setPosition(pos);
 
     // uncomment to print current player pos
-    std::cout << "Player position: (" << position.x << ", " << position.y << ")\n";
+    //std::cout << "Player position: (" << pos.x << ", " << pos.y << ")\n";
 }
 
 void World::adapt_player_velocity()
@@ -382,8 +454,9 @@ sf::FloatRect World::get_chunk_bounds() const
     return bounds;
 }
 
-/** Uses matches_categories() to decide how to handle each collider pair as
- * desired.
+/** 
+ * Uses matches_categories() to decide how to handle each collider pair (as
+ * desired).
  */
 void World::handle_collisions()
 {
@@ -420,6 +493,106 @@ void World::handle_collisions()
             auto& projectile = static_cast<Projectile&>(*pair.second);
             creature.damage(projectile.get_damage());
             projectile.destroy();
+        } else if (matches_categories(pair, Category::Player, 
+                                      Category::MapAssets)) {
+            m_player_creature->accelerate(sf::Vector2f(0.f, 0.f));
         }
+    }
+}
+
+void World::handle_map_collisions()
+{
+    sf::Vector2f pos = m_player_creature->getPosition();
+    //sf::Vector2f bounds = m_player_creature->getGlobalBounds();
+    //float left = pos.x - (bounds.height / 2.f);
+    //float right = (pos.x + bounds.width) - (bounds.height / 2.f);
+    //float top = pos.x + (bounds.width / 2.f);
+    //float bottom = pos.x; 
+    sf::Color color_at_xy = _map.getPixel(pos.x, pos.y);
+
+    // sort out map collisions: conditions to check if player sprite intersects 
+    // with black borders on map
+    if (color_at_xy == sf::Color(120, 4, 34)
+            || color_at_xy == sf::Color(63, 0, 127)
+            || color_at_xy == sf::Color(95, 62, 29)
+            || color_at_xy == sf::Color(255, 106, 0)) {
+        std::cout << "Player hit wall of building!\n";
+        sf::Vector2f prev = PREV_PLAYER_MOVEMENT;
+        std::cout << prev.x << "\n" << prev.y << "\n";
+        m_player_creature->accelerate(-prev);
+
+        // damage player 0.05 hp (~1/24th of a day)
+        m_player_creature->damage(0.05);    
+    }
+
+    //if player pos == black
+    //then accelerate -PlayerMover;
+    //
+    //
+
+    //m_player_creature->PlayerMover()
+
+    //// how maps collisions have to work...
+    ////     get player pos
+    ////     get color at pos
+    ////     if color == black then
+    ////     find what direction the intersection is
+    ////
+    ////
+    ////     revert previous movement command...
+    ////
+    ////     
+    ////
+    ////     calc what direction and how much of intersection
+    //
+    //// helper functions...
+    //float left = []() {
+    //    return pos.x - m_player_creature.getSize().x / 2.f; });
+    //float right = []() {
+    //    return pos.x + m_player_creature.getSize().x / 2.f; });
+    //float top = []() {
+    //    return pos.y - m_player_creature.getSize().y / 2.f; });
+    //float bottom = []() {
+    //    return pos.x + m_player_creature.getSize().y / 2.f; });
+
+    //float overlap_left 
+}
+
+void World::handle_map_edges() 
+{
+    sf::Vector2f pos = m_player_creature->getPosition();
+    float x_range = m_world_bounds.width;
+    float y_range = m_world_bounds.height;
+    if (pos.x <= 0.f) {
+        pos.x = 0.f;
+        m_player_creature->setPosition(pos);
+    }
+    if (pos.x >= x_range) {
+        pos.x = x_range;
+        m_player_creature->setPosition(pos);
+    }
+    if (pos.y <= 0.f) {
+        pos.y = 0.f;
+        m_player_creature->setPosition(pos);
+    }
+    // -1 is magic number, seg faulting when crossing y max boundary!
+    if (pos.y >= y_range - 1) {
+        pos.y = y_range - 1;
+        m_player_creature->setPosition(pos);
+    }
+}
+
+void World::handle_player_death()
+{
+    if (m_player_creature->is_marked_for_removal()) {
+        // @note original unique_ptr will lose scope and call its destructor
+        // - memory safe
+        m_scene_graph.removal();
+        // Add player character to the scene.
+        std::unique_ptr<Creature> player(new Creature(
+                Creature::Player, m_textures, m_fonts));
+        m_player_creature = player.get();
+        m_player_creature->setPosition(m_player_spawn_point);
+        m_scene_layers[Foreground]->attach_child(std::move(player));
     }
 }
