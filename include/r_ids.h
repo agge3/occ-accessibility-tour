@@ -22,6 +22,21 @@ namespace Textures {
         TitleScreen,
         HealthRefill,
         StudentUnion,
+        CollegeCenter,
+        CampusSafety,
+        Classroom,
+        ClassroomFlipped,
+        Pool,
+        RelayPool,
+        Football,
+        Soccer,
+        Tennis,
+        Harbor,
+        Mbcc,
+        Maintenance,
+        Starbucks,
+        Baseball,
+        Track,
     };
 }
 

@@ -15,7 +15,7 @@
 #include <limits>
 
 namespace {
-    static const sf::Vector2f SPAWN_POINT(2450.f, 850.f);
+    static const sf::Vector2f SPAWN_POINT(900.f, 1100.f);
 }
 
 World::World(sf::RenderWindow& window, FontHolder& fonts) :
@@ -31,7 +31,7 @@ World::World(sf::RenderWindow& window, FontHolder& fonts) :
 
     // world third ->
     // set the size of the world
-    m_world_bounds(0.f, 0.f, 8192.f, 7536.f),
+    m_world_bounds(0.f, 0.f, 7000.f, 4000.f),
     // set player view to be zoomed in, keeping aspect ratio - 1.78
     m_world_view(sf::FloatRect(0.f, 0.f, 1366.f, 768.f)),
     m_scroll_speed(0.f),
@@ -41,7 +41,7 @@ World::World(sf::RenderWindow& window, FontHolder& fonts) :
     // spawn player in the center of the world
     //m_player_spawn_point(m_world_bounds.width / 2.f,
     //        m_world_bounds.height / 2.f)
-    
+
     // spawn player at designated spawn point
     m_player_spawn_point(SPAWN_POINT.x, SPAWN_POINT.y),
 
@@ -78,7 +78,7 @@ void World::update(sf::Time delta_time)
     /// Entity(ies).
     handle_collisions();
 
-    // Handle Map collisions. If Player crosses a black border (how Map is 
+    // Handle Map collisions. If Player crosses a black border (how Map is
     // designed), revert the previous movement command.
     //handle_map_collisions();
 
@@ -117,7 +117,7 @@ CommandQueue& World::get_command_queue()
  */
 void World::load_textures()
 {
-    m_textures.load(Textures::Player, "textures/player/pete-96px.png");
+    m_textures.load(Textures::Player, "textures/player/pete.png");
     //m_textures.load(Textures::FireProjectile, "textures/player/player.png");
 
     //m_textures.load(Textures::Bunny, "textures/player/player.png");
@@ -127,26 +127,41 @@ void World::load_textures()
 
     // Map assets:
     //m_textures.load(Textures::Map, "textures/world/occ-map-3-8192x7536.png");
-    // NOTE: also need to load this into an sf::Image, for map collision 
+    // NOTE: also need to load this into an sf::Image, for map collision
     // checking
     //_map = m_textures.get(Textures::Map).copyToImage();
     //
 
-    load_map(); 
+    load_map();
 }
 
 void World::load_map()
 {
     std::string world = "textures/world/";
-    m_textures.load(Textures::Grass, world + "grass1.png");
+    m_textures.load(Textures::Grass, world + "test_grass2.png");
     m_textures.load(Textures::StudentUnion, world + "student-union.png");
+    m_textures.load(Textures::CollegeCenter, world + "college-center.png");
+    m_textures.load(Textures::CampusSafety, world + "campus-safety.png");
+    m_textures.load(Textures::Classroom, world + "classroom.png");
+    m_textures.load(Textures::ClassroomFlipped, world + "classroom-flipped.png");
+    m_textures.load(Textures::Pool, world + "pool.png");
+    m_textures.load(Textures::RelayPool, world + "relay-pool.png");
+    m_textures.load(Textures::Football, world + "football.png");
+    m_textures.load(Textures::Soccer, world + "soccer.png");
+    m_textures.load(Textures::Tennis, world + "tennis.png");
+    m_textures.load(Textures::Harbor, world + "harbor.png");
+    m_textures.load(Textures::Mbcc, world + "mbcc.png");
+    m_textures.load(Textures::Maintenance, world + "maintenance.png");
+    m_textures.load(Textures::Starbucks, world + "starbucks.png");
+    m_textures.load(Textures::Track, world + "track.png");
+    m_textures.load(Textures::Baseball, world + "baseball.png");
 }
 
 void World::build_scene()
 {
     /// Initialize all the different scene layers.
     for(std::size_t i = 0; i < LayerCount; ++i) {
-        Category::Type category = 
+        Category::Type category =
             (i == Foreground) ? Category::SceneGroundLayer : Category::None;
         SceneNode::Ptr layer(new SceneNode(category));
         m_scene_layers[i] = layer.get();
@@ -171,12 +186,12 @@ void World::build_scene()
     m_player_creature = player.get();
     m_player_creature->setPosition(m_player_spawn_point);
     m_scene_layers[Foreground]->attach_child(std::move(player));
-    
+
     //build_map();
 
     /** No NPCs... */
     //add_npcs();
-    
+
     add_map_assets();
 }
 
@@ -191,7 +206,7 @@ void World::build_map()
     for (int i = 0; i < assets.size(); ++i) {
         assets.at(0);
     }
- 
+
     //sf::Texture& texture = m_textures.get(Textures::StudentUnion);
     //_map_asset_command.category = Category::MapAsset;
     //_map_asset_command.action = [this, &texture] (SceneNode& node, sf::Time) {
@@ -427,7 +442,7 @@ void World::destroy_entities_outside_chunk()
  * categories - Player/Pickup, Player/EnemyNpc, Player/EnemyProjectile,
  * PlayerProjectile/EnemyNpc.
  */
-bool matches_categories(SceneNode::Pair& colliders, Category::Type type1, 
+bool matches_categories(SceneNode::Pair& colliders, Category::Type type1,
                         Category::Type type2)
 {
     /// Colliders are stored in a pair, first and second are colliders.
@@ -471,7 +486,7 @@ sf::FloatRect World::get_chunk_bounds() const
     return bounds;
 }
 
-/** 
+/**
  * Uses matches_categories() to decide how to handle each collider pair (as
  * desired).
  */
@@ -510,7 +525,7 @@ void World::handle_collisions()
         //    auto& projectile = static_cast<Projectile&>(*pair.second);
         //    creature.damage(projectile.get_damage());
         //    projectile.destroy();
-        if (matches_categories(pair, Category::Player, 
+        if (matches_categories(pair, Category::Player,
                                       Category::MapAsset)) {
             std::cout << "Collision with MapAsset detected!\n";
 
@@ -520,7 +535,7 @@ void World::handle_collisions()
             sf::FloatRect pbound = player.get_bounding_rect();
             float pbound_right = (pbound.left + pbound.width);
             float pbound_bottom = pbound.top + pbound.height;
-            
+
             sf::FloatRect mbound = map.get_bounding_rect();
             float mbound_right = mbound.left + mbound.width;
             float mbound_bottom = mbound.top + mbound.height;
@@ -541,7 +556,7 @@ void World::handle_collisions()
             }
             // bottom-up collision
             if (pbound.top <= mbound_bottom) {
-                float overlap = mbound_bottom - pbound.top; 
+                float overlap = mbound_bottom - pbound.top;
                 pvel.y -= overlap;
                 player.set_velocity(pvel);
             }
@@ -551,7 +566,7 @@ void World::handle_collisions()
                 pvel.y += overlap;
                 player.set_velocity(pvel);
             }
-        }   
+        }
     }
 }
 
@@ -562,10 +577,10 @@ void World::handle_map_collisions()
     //float left = pos.x - (bounds.height / 2.f);
     //float right = (pos.x + bounds.width) - (bounds.height / 2.f);
     //float top = pos.x + (bounds.width / 2.f);
-    //float bottom = pos.x; 
+    //float bottom = pos.x;
     sf::Color color_at_xy = _map.getPixel(pos.x, pos.y);
 
-    // sort out map collisions: conditions to check if player sprite intersects 
+    // sort out map collisions: conditions to check if player sprite intersects
     // with black borders on map
     if (color_at_xy == sf::Color(120, 4, 34)
             || color_at_xy == sf::Color(63, 0, 127)
@@ -577,7 +592,7 @@ void World::handle_map_collisions()
         m_player_creature->accelerate(-prev);
 
         // damage player 0.05 hp (~1/24th of a day)
-        m_player_creature->damage(0.05);    
+        m_player_creature->damage(0.05);
     }
 
     //if player pos == black
@@ -596,7 +611,7 @@ void World::handle_map_collisions()
     ////
     ////     revert previous movement command...
     ////
-    ////     
+    ////
     ////
     ////     calc what direction and how much of intersection
     //
@@ -610,10 +625,10 @@ void World::handle_map_collisions()
     //float bottom = []() {
     //    return pos.x + m_player_creature.getSize().y / 2.f; });
 
-    //float overlap_left 
+    //float overlap_left
 }
 
-void World::handle_map_edges() 
+void World::handle_map_edges()
 {
     sf::Vector2f pos = m_player_creature->getPosition();
     float x_range = m_world_bounds.width;
@@ -653,11 +668,11 @@ void World::handle_player_death()
 }
 
 void World::add_map_asset(Creature::Type type, sf::Vector2f& coord)
-{   
+{
     // @note NOT relative to player!
-    //sf::Vector2f rel(m_player_spawn_point.x + vec2_rel.x, 
+    //sf::Vector2f rel(m_player_spawn_point.x + vec2_rel.x,
     //                 m_player_spawn_point.y + vec2_rel.y);
-    
+
     SpawnPoint spawn(type, coord);
 
     // after init spawn with enemy type and pos of spawn, push into spawn point
@@ -668,9 +683,68 @@ void World::add_map_asset(Creature::Type type, sf::Vector2f& coord)
 
 void World::add_map_assets()
 {
-    sf::Vector2f student_union(1000.f, 1000.f);
+    sf::Vector2f student_union(4300.f, 700.f);
     add_map_asset(Creature::StudentUnion, student_union);
-    
+
+    sf::Vector2f college_center(3000.f, 700.f);
+    add_map_asset(Creature::CollegeCenter, college_center);
+
+    sf::Vector2f campus_safety(5500.f, 800.f);
+    add_map_asset(Creature::CampusSafety, campus_safety);
+
+    sf::Vector2f classroom(3900.f, 1700.f);
+    add_map_asset(Creature::Classroom, classroom);
+
+    sf::Vector2f classroom_dupe_1(3400.f, 2000.f);
+    add_map_asset(Creature::Classroom, classroom_dupe_1);
+
+    sf::Vector2f classroom_dupe_2(2000.f, 500.f);
+    add_map_asset(Creature::Classroom, classroom_dupe_2);
+
+    sf::Vector2f classroom_flipped_1(6500.f, 1000.f);
+    add_map_asset(Creature::ClassroomFlipped, classroom_flipped_1);
+
+    sf::Vector2f classroom_flipped_2(6600.f, 1700.f);
+    add_map_asset(Creature::ClassroomFlipped, classroom_flipped_2);
+
+    sf::Vector2f pool(2400.f, 1900.f);
+    add_map_asset(Creature::Pool, pool);
+
+    sf::Vector2f relay_pool(1800.f, 2250.f);
+    add_map_asset(Creature::RelayPool, relay_pool);
+
+    sf::Vector2f football(1800.f, 1250.f);
+    add_map_asset(Creature::Football, football);
+
+    sf::Vector2f soccer(500.f, 1500.f);
+    add_map_asset(Creature::Soccer, soccer);
+
+    sf::Vector2f tennis(500.f, 2350.f);
+    add_map_asset(Creature::Tennis, tennis);
+
+    sf::Vector2f harbor(1300.f, 3500.f);
+    add_map_asset(Creature::Harbor, harbor);
+
+    sf::Vector2f harbor_dupe_1(700.f, 3300.f);
+    add_map_asset(Creature::Harbor, harbor_dupe_1);
+
+    sf::Vector2f harbor_dupe_2(100.f, 3500.f);
+    add_map_asset(Creature::Harbor, harbor_dupe_2);
+
+    sf::Vector2f mbcc(5000.f, 1900.f);
+    add_map_asset(Creature::Mbcc, mbcc);
+
+    sf::Vector2f maintenance(4500.f, 3000.f);
+    add_map_asset(Creature::Maintenance, maintenance);
+
+    sf::Vector2f starbucks(2000.f, 3700.f);
+    add_map_asset(Creature::Starbucks, starbucks);
+
+    sf::Vector2f track(3000.f, 2800.f);
+    add_map_asset(Creature::Track, track);
+
+    sf::Vector2f baseball(700.f, 700.f);
+    add_map_asset(Creature::Baseball, baseball);
     // uncomment to print success
     //std::cout << "MapAsset Creature added.\n";
 }
@@ -686,7 +760,7 @@ void World::spawn_map_assets() {
         std::cout << spawn.type << " spawned in the world!" << " ("
             << std::setprecision(0) << spawn.vec2.x << ", " << spawn.vec2.y
             << ")\n";
-    
+
         m_scene_layers[Foreground]->attach_child(std::move(map_asset));
         _map_asset_spawn_points.pop_back();
     }
