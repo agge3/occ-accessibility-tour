@@ -90,7 +90,7 @@ private:
     void handle_player_death();
     void load_map();
     void build_map();
-
+    void build_scenery();
 
     sf::RenderWindow& m_window;
     sf::View m_world_view;
@@ -114,7 +114,7 @@ private:
 
     /**
     * @var sf::Image _map
-    * Copies sf::Texture from GPU into an sf::Image, for checking map 
+    * Copies sf::Texture from GPU into an sf::Image, for checking map
     * collisions.
     * @warning Might be very slow operation! Has to copy from GPU...
     * @remark Probably find better solution. Temporary!

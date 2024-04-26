@@ -27,7 +27,7 @@ static const char MODEL_PATH[] =
     "../dep/deepspeech-models/deepspeech-0.9.3-models.pbmm";
 static const char SCORER_PATH[] =
     //"../dep/deepspeech-models/deepspeech-0.9.3-models.scorer";
-    "../dep/deepspeech-models/kenlm.scorer";
+    "../dep/deepspeech-models/kenlm-no-a.scorer";
 
 stt::SpeechToText::SpeechToText() :
     _mpath(MODEL_PATH),
@@ -83,24 +83,23 @@ stt::SpeechToText::SpeechToText() :
         #pragma GCC diagnostic ignored "-Wwrite-strings"
     #endif
 
-    std::vector<char*> hotwords = {"up", "down", "left", "right", "play", 
-        "exit"};
+    std::vector<char*> hotwords = {"up", "down", "left", "right"};
 
-    //for (int i = 0; i < hotwords.size(); ++i) {
-    //    // NOTE: Between 8-9-10 (thought 9 was ideal!).
-    //    DS_AddHotWord(_ctx, hotwords.at(0), 9.f);
-    //}
+    for (int i = 0; i < hotwords.size(); ++i) {
+        // NOTE: Between 8-9-10 (thought 9 was ideal!).
+        DS_AddHotWord(_ctx, hotwords.at(0), 9.f);
+    }
 
     //std::vector<char*> coldwords = {"but", "at", "he", "ah", "the", "put", "bu",
-    //    "laughed", "ray", "lalage", "a", "raleigh", "lalala", "la", "lala", 
-    //    "let", "bound", "way", "ran", "can", "she", "that", "laplace", 
-    //    "legless", "leslie", "leaf", "it", "retract", "retreat", "laugh", 
+    //    "laughed", "ray", "lalage", "a", "raleigh", "lalala", "la", "lala",
+    //    "let", "bound", "way", "ran", "can", "she", "that", "laplace",
+    //    "legless", "leslie", "leaf", "it", "retract", "retreat", "laugh",
     //    "rare", "literate", "they", "then", "dan", "about", "reflect", "late",
     //    "letter", "after", "rat", "lefroy", "lefty", "we", "black", "laughter",
-    //    "lara", "rare", "levi", "later", "tara", "well", "olaf", "bright", 
-    //    "are", "last", "breath", "best", "boundless", "westray", "repeat", 
-    //    "willet", "riles", "about", "to", "laughest", "latest", "levelest", 
-    //    "reflect", "little", "lest", "lachan", "lathrop", "have", "red", 
+    //    "lara", "rare", "levi", "later", "tara", "well", "olaf", "bright",
+    //    "are", "last", "breath", "best", "boundless", "westray", "repeat",
+    //    "willet", "riles", "about", "to", "laughest", "latest", "levelest",
+    //    "reflect", "little", "lest", "lachan", "lathrop", "have", "red",
     //    "rara"};
 
     ///** @note Close words that should also be parsed as command:
@@ -127,7 +126,7 @@ stt::SpeechToText::SpeechToText() :
         #pragma GCC diagnostic pop
     #endif
 
-    /** @brief Set model beam width in SpeechToText constructor (is set to a low 
+    /** @brief Set model beam width in SpeechToText constructor (is set to a low
      * value for faster decodes, don't need complicated sentence structure). */
 
     // xxx figure out best beam width. NOTE: 100 was a MASSIVE improvement to
@@ -213,14 +212,14 @@ void stt::SpeechToText::decode() {
 
     std::cout << stt << "\n";
 
-    /** @brief Convert local C char* stt to CXX member std::string decoded. stt 
+    /** @brief Convert local C char* stt to CXX member std::string decoded. stt
      * is freed from memory, CXX std::string will handle memory management. */
     _decoded = stt;
     DS_FreeString(stt);
 }
 
 /**
- * Get DeepSpeech SpeechToText decoded std::string, for Key interface to take 
+ * Get DeepSpeech SpeechToText decoded std::string, for Key interface to take
  * over and provide public Key interface.
  * @return std::string decoded, decoded DeepSpeech SpeechToText string
  */
@@ -230,7 +229,7 @@ std::string stt::SpeechToText::get_decoded()
 }
 
 void stt::SpeechToText::parse()
-{    
+{
     /** @brief Parse CXX string for key inputs. */
     std::istringstream in(_decoded);
     std::string parse;
@@ -239,9 +238,9 @@ void stt::SpeechToText::parse()
             _key_queue.push(Key::Up);
         else if (parse == "down")
             _key_queue.push(Key::Down);
-        else if (parse == "left") 
+        else if (parse == "left")
             _key_queue.push(Key::Left);
-        else if (parse == "right") 
+        else if (parse == "right")
             _key_queue.push(Key::Right);
 
         /** @note Close words that should also be parsed as command:
@@ -289,7 +288,7 @@ void stt::SpeechToText::parse()
             _key_queue.push(Key::Play);
         else if (parse == "exit")
             _key_queue.push(Key::Exit);
-        
+
         else
             continue;
     }

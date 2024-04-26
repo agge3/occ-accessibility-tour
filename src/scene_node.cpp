@@ -76,7 +76,8 @@ void SceneNode::draw(sf::RenderTarget& target, sf::RenderStates states) const
     draw_current(target, states);
     draw_children(target, states);
 
-    draw_bounding_rect(target, states);
+    // uncomment to draw bounding rectangles (for collisions)
+    //draw_bounding_rect(target, states);
 }
 
 void SceneNode::draw_current(sf::RenderTarget&, sf::RenderStates) const
