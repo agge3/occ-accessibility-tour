@@ -13,7 +13,7 @@ std::vector<CreatureData> initialize_creature_data()
     std::vector<CreatureData> data(Creature::TypeCount);
 
     // PLAYER DATA
-    data[Creature::Player].hitpoints = 100.f;
+    data[Creature::Player].hitpoints = 30.f;
     data[Creature::Player].speed = 75.f;
     data[Creature::Player].texture = Textures::Player;
     data[Creature::Player].attack_interval = sf::seconds(1);

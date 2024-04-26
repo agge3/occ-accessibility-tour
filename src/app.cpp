@@ -56,7 +56,7 @@ Application::Application() :
     m_textures.load(Textures::TitleScreen, "textures/title/main-menu-2.png");
 
     register_states();
-    m_state_stack.push_state(States::Title);
+    m_state_stack.push_state(States::Menu);
 }
 
 void Application::run()

@@ -19,19 +19,24 @@ MenuState::MenuState(StateStack& stack, Context context) :
     _th()
 {
     // get title screen from context, already in mem, don't need to recreate
-    m_background_sprite.setTexture(context.textures->get(Textures::TitleScreen));
+    m_background_sprite.setTexture(context.textures->get(
+                Textures::TitleScreen));
     scale_sprite(m_background_sprite);
     // get main font from context, already in mem, don't need to recreate
     sf::Font& font = context.fonts->get(Fonts::Main);
 
     // MENU:
+    // set starting y position and option offset (from start)
+    int start = 632;
+    int offset = 35;
+
     // play option...
     sf::Text play_option;
     play_option.setFont(font);
     play_option.setString("Play");
     center_origin(play_option);
     // (x, y) px of play
-    play_option.setPosition(640, 600);
+    play_option.setPosition(640, start);
     // add to menu options vector
     m_options.push_back(play_option);
 
@@ -41,7 +46,7 @@ MenuState::MenuState(StateStack& stack, Context context) :
     settings_option.setString("Settings");
     center_origin(settings_option);
     // (x, y) px of exit, -30 px y offset from play
-    settings_option.setPosition(640, 630);
+    settings_option.setPosition(640, start + offset);
     // add to menu options vector
     m_options.push_back(settings_option);
 
@@ -51,7 +56,7 @@ MenuState::MenuState(StateStack& stack, Context context) :
     exit_option.setString("Exit");
     center_origin(exit_option);
     // (x, y) px of exit, -30 px y offset from settings
-    exit_option.setPosition(640, 660);
+    exit_option.setPosition(640, start + (2 * offset));
     // add to menu options vector
     m_options.push_back(exit_option);
 
@@ -158,13 +163,20 @@ bool MenuState::handle_event(const sf::Event& event)
 
 void MenuState::update_option_text()
 {
+    // occ colors:
+    sf::Color occ_blue(0, 45, 106);
+    sf::Color occ_orange(249, 146, 57);
+
     // guard action in case options empty...
     if (!m_options.empty()) {
-        // white all option text
+        // occ blue all option text
         for (sf::Text& text : m_options)
-            text.setFillColor(sf::Color::White);
-        // red selected option text
-        m_options[m_options_index].setFillColor(sf::Color::Red);
+            text.setFillColor(occ_blue);
+        // occ orange selected option text
+        m_options[m_options_index].setFillColor(occ_orange);
+        // xxx changes blue options to have outline too, after select (!)
+        //m_options[m_options_index].setOutlineColor(sf::Color::Black);
+        //m_options[m_options_index].setOutlineThickness(2.5f);
     }
 }
 

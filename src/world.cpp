@@ -88,7 +88,7 @@ void World::update(sf::Time delta_time)
     /** @remark UNUSED, no NPCs... */
     /// Remove all destroyed entities and create new ones.
     //m_scene_graph.removal();
-    //handle_player_death();
+    handle_player_death();
     //spawn_npcs();
     spawn_map_assets();
 
@@ -99,9 +99,9 @@ void World::update(sf::Time delta_time)
     handle_map_edges();
 
     // uncomment to print player position
-    sf::Vector2f pos = m_player_creature->getPosition();
-    std::cout << std::setprecision(0) << std::fixed << "Player position: ("
-        << pos.x << ", " << pos.y << ")\n";
+    //sf::Vector2f pos = m_player_creature->getPosition();
+    //std::cout << std::setprecision(0) << std::fixed << "Player position: ("
+    //    << pos.x << ", " << pos.y << ")\n";
 }
 
 void World::draw()
@@ -636,7 +636,7 @@ void World::adapt_player_position()
             - (m_world_view.getSize() / 2.f), m_world_view.getSize());
     /// Initialize distance from "border" (before view pan).
     // what distance from border before panning view? 16.f = 16px
-	constexpr float border = 16.f;
+	constexpr float border = 125.f;
 
     /// Initialize position to player position.
 	sf::Vector2f pos = m_player_creature->getPosition();
@@ -960,26 +960,34 @@ void World::handle_collisions()
             if (pbound.left <= mbound_right) {
                 float overlap = mbound_right - pbound.left;
                 pvel.x -= overlap;
+                // to soften collision animation ->
+                pvel.x *= 0.25f;
                 player.set_velocity(pvel);
             }
             // right-side collision
             if (pbound_right >= mbound.left) {
                 float overlap = pbound_right - mbound.left;
                 pvel.x += overlap;
+                pvel.x *= 0.25f;
                 player.set_velocity(pvel);
             }
             // bottom-up collision
             if (pbound.top <= mbound_bottom) {
                 float overlap = mbound_bottom - pbound.top;
                 pvel.y -= overlap;
+                pvel.y *= 0.25f;
                 player.set_velocity(pvel);
             }
             // top-down collision
             if (pbound_bottom >= mbound.top) {
                 float overlap = pbound_bottom - mbound.top;
                 pvel.y += overlap;
+                pvel.y *= 0.25f;
                 player.set_velocity(pvel);
             }
+
+            // damage player 0.05 hp (~1/24th of a day)
+            player.damage(0.05);
         }
     }
 }
@@ -1166,7 +1174,7 @@ void World::add_map_assets()
     sf::Vector2f lewis_center(6425.f, 2409.f);
     add_map_asset(Creature::LewisCenter, lewis_center);
 
-    sf::Vector2f classroom_flipped_3(3071.f, 4016.f);
+    sf::Vector2f classroom_flipped_3(2850.f, 4016.f);
     add_map_asset(Creature::ClassroomFlipped, classroom_flipped_3);
 
     sf::Vector2f classroom_flipped_4(3508.f, 4024.f);
@@ -1178,7 +1186,7 @@ void World::add_map_assets()
     sf::Vector2f classroom_dupe_4(6468.f, 3393.f);
     add_map_asset(Creature::Classroom, classroom_dupe_3);
 
-    sf::Vector2f harbor_dupe_3(6495.f, 4027.f);
+    sf::Vector2f harbor_dupe_3(6495.f, 4077.f);
     add_map_asset(Creature::Harbor, harbor_dupe_3);
 
     // uncomment to print success

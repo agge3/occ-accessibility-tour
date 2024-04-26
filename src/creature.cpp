@@ -283,7 +283,7 @@ void Creature::update_texts()
         // offset will be incorrect
 
         // position will vary based on creature, set in condition block
-        m_health_display->setPosition(0.f, 60.f);
+        m_health_display->setPosition(42.5f, 60.f);
         break;
     case Creature::StudentUnion:
     // for everything else, display unique name of creature
@@ -303,6 +303,14 @@ void Creature::update_texts()
     case Creature::ClassroomFlipped:
         m_health_display->set_string("Classroom");
         m_health_display->setPosition(0.f, 306.f);
+        break;
+    case Creature::LewisCenter:
+        m_health_display->set_string("Lewis Center");
+        m_health_display->setPosition(0.f, 295.f);
+        break;
+    case Creature::Library:
+        m_health_display->set_string("Student Union");
+        m_health_display->setPosition(0.f, 383.f);
         break;
     case Creature::Pool:
         m_health_display->set_string("Pool");
