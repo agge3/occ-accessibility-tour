@@ -31,7 +31,7 @@ World::World(sf::RenderWindow& window, FontHolder& fonts) :
 
     // world third ->
     // set the size of the world
-    m_world_bounds(0.f, 0.f, 7000.f, 4000.f),
+    m_world_bounds(0.f, 0.f, 7000.f, 4500.f),
     // set player view to be zoomed in, keeping aspect ratio - 1.78
     m_world_view(sf::FloatRect(0.f, 0.f, 1366.f, 768.f)),
     m_scroll_speed(0.f),

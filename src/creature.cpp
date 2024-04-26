@@ -9,6 +9,7 @@
 
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/Color.hpp>
 
 #include <cmath>
 #include <iostream>
@@ -16,6 +17,7 @@
 #include <stdexcept>
 #include <ostream>
 #include <iomanip>
+#include <cstdint>
 
 /// Anonymous namespace to avoid name collisions in other files - store Creature
 /// data TABLE local to Creature.
@@ -55,13 +57,21 @@ Creature::Creature(Type type, const TextureHolder& textures,
      * constructor, for health display (and other text info...).
      * @note TextNode is suspect for errors. Has exception handling, is wrapped
      * in try-block. */
-    // create text node & attach to creature - health display
+
+    // create text node & attach to creature
+    //     * health display for player creature
+    //     * name for map asset creature
+
     try {
         std::unique_ptr<TextNode> health_display(new TextNode(fonts, ""));
-        m_health_display = health_display.get(); // mem ptr that points to node
+
+        // mem ptr that points to node
+        m_health_display = health_display.get();
         attach_child(std::move(health_display));
-        // print success to match expected text nodes with expected creatures
-        std::cout << "Text node initialized\n";
+
+        // uncomment to print success: match expected text nodes with expected 
+        // creatures
+        //std::cout << "Text node initialized\n";
     } catch (std::exception& e) {
         std::cerr << "\nexception: " << e.what() << std::endl;
     }
@@ -221,6 +231,7 @@ bool Creature::is_marked_for_removal() const
 
 void Creature::update_texts()
 {
+    // For HP display:
     // set hp precision to .0f - looks better
     float hp = get_hitpoints();
     std::string hp_string;
@@ -233,16 +244,144 @@ void Creature::update_texts()
         hp_string = oss.str();
     }
 
-    m_health_display->set_string(hp_string);
-    // print success to make sure this is only done once!
-    //std::cout << "Update texts: Health display text set ... success!\n"
-        // and shows the correct string...
-        //<< "Text: " << std::to_string(get_hitpoints()) << " HP\n";
+    // set up colors:
+    sf::Color occ_blue(0, 45, 106);
+    sf::Color occ_orange(249, 146, 57);
+
+    // set up styles:
+    // @see SFML documentation, style is bitwise shift left 
+    // (e.g., "Bold = 1 << 0")
+    std::uint32_t regular = 0;
+    std::uint32_t bold = 1 << 0;
+    std::uint32_t italic = 1 << 1;
+
+    // default text, to be overwriten in switch statement (for specific 
+    // Creature Type(s)
+    m_health_display->set_character_size(18);
+    m_health_display->set_fill_color(occ_blue);
+    m_health_display->set_style(bold);
     
-    m_health_display->set_fill_color(0, 0, 0); // rgb(red)
-    m_health_display->setPosition(0.f, 60.f);
+    // DON'T OVERWRITE!
     // -rotation negates any rotation of creature and keeps text upright
     m_health_display->setRotation(-getRotation());
+
+    switch (m_type) {
+    case Creature::Player:
+    // for player, show hp
+        m_health_display->set_string(hp_string);
+
+        // print success to make sure this is only done once!
+        //std::cout << "Update texts: Health display text set ... success!\n"
+            // and shows the correct string...
+            //<< "Text: " << std::to_string(get_hitpoints()) << " HP\n";
+        
+        // overwrite default text for player hp
+        m_health_display->set_character_size(13);
+        //m_health_display->set_style(regular);
+        
+        // @note default text needs to be set BEFORE position, or else position 
+        // offset will be incorrect
+        
+        // position will vary based on creature, set in condition block
+        m_health_display->setPosition(0.f, 60.f);
+        break;
+    case Creature::StudentUnion:
+    // for everything else, display unique name of creature
+    /** @note Showing Creature name is implemented as health display! */
+        m_health_display->set_string("Student Union");
+        m_health_display->setPosition(0.f, 295.f);
+        break;
+    case Creature::CollegeCenter:
+        m_health_display->set_string("College Center");
+        m_health_display->setPosition(0.f, 383.f);
+        break;
+    case Creature::CampusSafety:
+        m_health_display->set_string("Campus Safety");
+        m_health_display->setPosition(0.f, 309.f);
+        break;
+    case Creature::Classroom:
+    case Creature::ClassroomFlipped:
+        m_health_display->set_string("Classroom");
+        m_health_display->setPosition(0.f, 306.f);
+        break;
+    case Creature::Pool:
+        m_health_display->set_string("Pool");
+        m_health_display->setPosition(0.f, 262.f);
+        m_health_display->set_fill_color(occ_orange);
+        // to make occ orange more clear
+        m_health_display->set_outline_color(sf::Color::Black);
+        m_health_display->set_outline_thickness(2.5f); // 2 pt thickness
+        break;
+    case Creature::RelayPool:
+        m_health_display->set_string("Relay Pool");
+        m_health_display->setPosition(0.f, 293.f);
+        m_health_display->set_fill_color(occ_orange);
+        // to make occ orange more clear
+        m_health_display->set_outline_color(sf::Color::Black);
+        m_health_display->set_outline_thickness(2.5f); // 2 pt thickness
+        break;
+    case Creature::Football:
+        m_health_display->set_string("Football Field");
+        m_health_display->setPosition(0.f, 265.f);
+        m_health_display->set_fill_color(occ_orange);
+        // to make occ orange more clear
+        m_health_display->set_outline_color(sf::Color::Black);
+        m_health_display->set_outline_thickness(2.5f); // 2 pt thickness
+        break;
+    case Creature::Soccer:
+        m_health_display->set_string("Soccer Field");
+        m_health_display->setPosition(0.f, 264.f);
+        m_health_display->set_fill_color(occ_orange);
+        // to make occ orange more clear
+        m_health_display->set_outline_color(sf::Color::Black);
+        m_health_display->set_outline_thickness(2.5f); // 2 pt thickness
+        break;
+    case Creature::Tennis:
+        m_health_display->set_string("Tennis Field");
+        m_health_display->setPosition(0.f, 266.f);
+        m_health_display->set_fill_color(occ_orange);
+        // to make occ orange more clear
+        m_health_display->set_outline_color(sf::Color::Black);
+        m_health_display->set_outline_thickness(2.5f); // 2 pt thickness
+        break;
+    case Creature::Harbor:
+        m_health_display->set_string("The Harbor");
+        m_health_display->setPosition(0.f, 440.f);
+        break;
+    case Creature::Mbcc:
+        m_health_display->set_string(
+                "Mathematics Business & Computer Center");
+        m_health_display->setPosition(0.f, 553.f);
+        break;
+    case Creature::Maintenance:
+        m_health_display->set_string("Maintenance");
+        m_health_display->setPosition(0.f, 363.f);
+        break;
+    case Creature::Starbucks:
+        m_health_display->set_string("Coffee");
+        m_health_display->setPosition(0.f, 315.f);
+        break;
+    case Creature::Track:
+        m_health_display->set_string("Track Field");
+        m_health_display->setPosition(0.f, 265.f);
+        m_health_display->set_fill_color(occ_orange);
+        // to make occ orange more clear
+        m_health_display->set_outline_color(sf::Color::Black);
+        m_health_display->set_outline_thickness(2.5f); // 2 pt thickness
+        break;
+    case Creature::Baseball:
+        m_health_display->set_string("Baseball Field");
+        m_health_display->setPosition(0.f, 264.f);
+        m_health_display->set_fill_color(occ_orange);
+        // to make occ orange more clear
+        m_health_display->set_outline_color(sf::Color::Black);
+        m_health_display->set_outline_thickness(2.f); // 2 pt thickness
+        break;
+    default:
+        // default is empty string
+        m_health_display->set_string("");
+        m_health_display->setPosition(0.f, 0.f);
+    }    
 }
 
 /**
