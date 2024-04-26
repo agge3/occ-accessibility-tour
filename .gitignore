@@ -25,3 +25,5 @@ release/dep/deepspeech-models/kenlm.scorer
 release/dep/imgui
 release/dep/imgui-sfml
 release/dep/linux
+dep/deepspeech-models/kenlm-more-words.scorer
+dep/deepspeech-models/kenlm-less-words.scorer

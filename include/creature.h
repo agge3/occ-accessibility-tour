@@ -20,6 +20,23 @@ public:
     enum Type {
         Player,
         StudentUnion,
+        CollegeCenter,
+        CampusSafety,
+        Classroom,
+        ClassroomFlipped,
+        Pool,
+        RelayPool,
+        Football,
+        Soccer,
+        Tennis,
+        Harbor,
+        Mbcc,
+        Maintenance,
+        Starbucks,
+        Track,
+        Baseball,
+        Library,
+        LewisCenter,
         TypeCount,
     };
 
@@ -47,7 +64,7 @@ private:
             float x_offset, float y_offset, const TextureHolder& textures) const;
     void create_pickup(SceneNode& node, const TextureHolder& textures) const;
     void update_texts();
-    void create_map_asset(SceneNode& node, MapAsset::Type type, 
+    void create_map_asset(SceneNode& node, MapAsset::Type type,
                           const TextureHolder& textures) const;
 
     Type m_type;

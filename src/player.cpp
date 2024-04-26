@@ -20,7 +20,7 @@ struct PlayerMover {
         sf::Vector2f movement(velocity * player.get_max_speed());
         PREV_PLAYER_MOVEMENT = movement;
         // uncomment to print previous player movement
-        //std::cout << "Previous Player movement: (" << movement.x << "x, " 
+        //std::cout << "Previous Player movement: (" << movement.x << "x, "
         //    << movement.y << "y)\n";
         player.accelerate(movement);
         // uncomment to print current player velocity
@@ -34,8 +34,8 @@ struct PlayerMover {
  * @note Default LevelStatus of Player is InProgress. Initialized in default
  * constructor.
  */
-Player::Player() : 
-    m_current_level_status(InProgress),     
+Player::Player() :
+    m_current_level_status(InProgress),
     _stt(std::make_unique<stt::SpeechToText>())
 {
     /// Try to set default keyboard keybindings.
@@ -54,25 +54,25 @@ Player::Player() :
     } catch (std::exception& e) {
         /// Catch exception and print error message.
         std::cerr << "\n EXCEPTION: " << e.what() <<
-            ". Failed to set default player keyboard keybindings.\n" 
+            ". Failed to set default player keyboard keybindings.\n"
             << std::endl;
     }
 
     /// Try to set default SpeechToText keybindings.
     try {
-        _sttbinding[stt::Key::Up] = MoveUp;
+        _sttbinding[stt::Key::Up] = STTMoveUp;
         std::cout << "Player keybind: Move up = SpeechToText \"Up\"\n";
-        _sttbinding[stt::Key::Down] = MoveDown;
+        _sttbinding[stt::Key::Down] = STTMoveDown;
         std::cout << "Player keybind: Move down = SpeechToText \"Down\"\n";
-        _sttbinding[stt::Key::Left] = MoveLeft;
+        _sttbinding[stt::Key::Left] = STTMoveLeft;
         std::cout << "Player keybind: Move left = SpeechToText \"Left\"\n";
-        _sttbinding[stt::Key::Right] = MoveRight;
+        _sttbinding[stt::Key::Right] = STTMoveRight;
         std::cout << "Player keybind: Move right = SpeechToText \"Right\"\n";
 
     } catch (std::exception& e) {
         /// Catch exception and print error message.
         std::cerr << "\n EXCEPTION: " << e.what() <<
-            ". Failed to set default player SpeechToText keybindings." 
+            ". Failed to set default player SpeechToText keybindings."
             << std::endl;
     }
 
@@ -187,19 +187,19 @@ void Player::initialize_actions() {
 	m_actionbinding[MoveRight].action = derived_action<Creature>(
             PlayerMover(+5.f, 0.f));
     std::cout << "Player action initialized: Move right\n";
-	
+
     // STT actions:
     m_actionbinding[STTMoveUp].action = derived_action<Creature>(
-            PlayerMover(0.f, -150.f));
+            PlayerMover(0.f, -250.f));
     std::cout << "Player SpeechToText action initialized: Move up\n";
 	m_actionbinding[STTMoveDown].action = derived_action<Creature>(
-            PlayerMover(0.f, +150.f));
+            PlayerMover(0.f, +250.f));
     std::cout << "Player SpeechToText action initialized: Move down\n";
     m_actionbinding[STTMoveLeft].action = derived_action<Creature>(
-            PlayerMover(-150.f, 0.f));
+            PlayerMover(-250.f, 0.f));
     std::cout << "Player SpeechToText action initialized: Move left\n";
 	m_actionbinding[STTMoveRight].action = derived_action<Creature>(
-            PlayerMover(+150.f, 0.f));
+            PlayerMover(+250.f, 0.f));
     std::cout << "Player SpeechToText action initialized: Move right\n";
 
     // attack actions...

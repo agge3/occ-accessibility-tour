@@ -51,12 +51,12 @@ Application::Application() :
         std::cout << "ImGui initialized!" << std::endl;*/
 
     // load main font
-    m_fonts.load(Fonts::Main, "fonts/Hack-Regular.ttf");
+    m_fonts.load(Fonts::Main, "fonts/Kaph-Regular.ttf");
     // load title screen
-    m_textures.load(Textures::TitleScreen, "textures/title/main-menu.png");
+    m_textures.load(Textures::TitleScreen, "textures/title/main-menu-2.png");
 
     register_states();
-    m_state_stack.push_state(States::Title);
+    m_state_stack.push_state(States::Menu);
 }
 
 void Application::run()
