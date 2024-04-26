@@ -27,3 +27,8 @@ release/dep/imgui-sfml
 release/dep/linux
 dep/deepspeech-models/kenlm-more-words.scorer
 dep/deepspeech-models/kenlm-less-words.scorer
+<<<<<<< HEAD
+dep/deepspeech-models/kenlm-no-a.scorer
+dep/deepspeech-models/kenlm-only-keys.scorer
+=======
+>>>>>>> 70358e4573c4f036ca0905dffe86c5741d7fd904

@@ -27,7 +27,7 @@ static const char MODEL_PATH[] =
     "../dep/deepspeech-models/deepspeech-0.9.3-models.pbmm";
 static const char SCORER_PATH[] =
     //"../dep/deepspeech-models/deepspeech-0.9.3-models.scorer";
-    "../dep/deepspeech-models/kenlm-more-words.scorer";
+    "../dep/deepspeech-models/kenlm-no-a.scorer";
 
 stt::SpeechToText::SpeechToText() :
     _mpath(MODEL_PATH),
@@ -83,8 +83,7 @@ stt::SpeechToText::SpeechToText() :
         #pragma GCC diagnostic ignored "-Wwrite-strings"
     #endif
 
-    std::vector<char*> hotwords = {"up", "down", "left", "right", "play",
-        "exit"};
+    std::vector<char*> hotwords = {"up", "down", "left", "right"};
 
     //for (int i = 0; i < hotwords.size(); ++i) {
     //    // NOTE: Between 8-9-10 (thought 9 was ideal!).
