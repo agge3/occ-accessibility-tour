@@ -69,7 +69,7 @@ Creature::Creature(Type type, const TextureHolder& textures,
         m_health_display = health_display.get();
         attach_child(std::move(health_display));
 
-        // uncomment to print success: match expected text nodes with expected 
+        // uncomment to print success: match expected text nodes with expected
         // creatures
         //std::cout << "Text node initialized\n";
     } catch (std::exception& e) {
@@ -135,7 +135,7 @@ void Creature::update_current(sf::Time dt, CommandQueue& commands)
     Entity::update_current(dt, commands);
 
     /** @brief Update Creature texts. */
-    update_texts(); 
+    update_texts();
 }
 
 void Creature::update_pathing(sf::Time dt)
@@ -239,7 +239,7 @@ void Creature::update_texts()
     // scoped to avoid potential oss collisions
     {
         std::ostringstream oss;
-        oss << std::setprecision(0) << std::fixed << hp 
+        oss << std::setprecision(0) << std::fixed << hp
             << " days left in semester";
         hp_string = oss.str();
     }
@@ -249,18 +249,18 @@ void Creature::update_texts()
     sf::Color occ_orange(249, 146, 57);
 
     // set up styles:
-    // @see SFML documentation, style is bitwise shift left 
+    // @see SFML documentation, style is bitwise shift left
     // (e.g., "Bold = 1 << 0")
     std::uint32_t regular = 0;
     std::uint32_t bold = 1 << 0;
     std::uint32_t italic = 1 << 1;
 
-    // default text, to be overwriten in switch statement (for specific 
+    // default text, to be overwriten in switch statement (for specific
     // Creature Type(s)
     m_health_display->set_character_size(18);
     m_health_display->set_fill_color(occ_blue);
     m_health_display->set_style(bold);
-    
+
     // DON'T OVERWRITE!
     // -rotation negates any rotation of creature and keeps text upright
     m_health_display->setRotation(-getRotation());
@@ -274,14 +274,14 @@ void Creature::update_texts()
         //std::cout << "Update texts: Health display text set ... success!\n"
             // and shows the correct string...
             //<< "Text: " << std::to_string(get_hitpoints()) << " HP\n";
-        
+
         // overwrite default text for player hp
         m_health_display->set_character_size(13);
         //m_health_display->set_style(regular);
-        
-        // @note default text needs to be set BEFORE position, or else position 
+
+        // @note default text needs to be set BEFORE position, or else position
         // offset will be incorrect
-        
+
         // position will vary based on creature, set in condition block
         m_health_display->setPosition(0.f, 60.f);
         break;
@@ -381,7 +381,7 @@ void Creature::update_texts()
         // default is empty string
         m_health_display->set_string("");
         m_health_display->setPosition(0.f, 0.f);
-    }    
+    }
 }
 
 /**

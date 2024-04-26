@@ -37,6 +37,11 @@ namespace Textures {
         Starbucks,
         Baseball,
         Track,
+        Scenery,
+        Scenery1,
+        Scenery2,
+        Library,
+        LewisCenter,
     };
 }
 

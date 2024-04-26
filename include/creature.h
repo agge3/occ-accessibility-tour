@@ -35,6 +35,8 @@ public:
         Starbucks,
         Track,
         Baseball,
+        Library,
+        LewisCenter,
         TypeCount,
     };
 

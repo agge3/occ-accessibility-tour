@@ -68,6 +68,13 @@ void scale_sprite(sf::Sprite& sprite)
     }
 }
 
+/**
+ * Scale sprite by percent (factor of 1.0).
+ */
+//void percent_scale_sprite(sf::Sprite& sprite, float percent)
+//{
+//    ratio =
+
 void scale_vector2f(sf::Vector2f& vector2f, float scale)
 {
     vector2f.x *= scale;

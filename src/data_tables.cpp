@@ -98,6 +98,17 @@ std::vector<CreatureData> initialize_creature_data()
     data[Creature::Baseball].hitpoints = 100.f;
     data[Creature::Baseball].speed = 0.f;
     data[Creature::Baseball].attack_interval = sf::seconds(1);
+
+    data[Creature::Library].texture = Textures::Library;
+    data[Creature::Library].hitpoints = 100.f;
+    data[Creature::Library].speed = 0.f;
+    data[Creature::Library].attack_interval = sf::seconds(1);
+
+    data[Creature::LewisCenter].texture = Textures::LewisCenter;
+    data[Creature::LewisCenter].hitpoints = 100.f;
+    data[Creature::LewisCenter].speed = 0.f;
+    data[Creature::LewisCenter].attack_interval = sf::seconds(1);
+
     return data;
 }
 
