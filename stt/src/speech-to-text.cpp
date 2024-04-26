@@ -86,10 +86,10 @@ stt::SpeechToText::SpeechToText() :
     std::vector<char*> hotwords = {"up", "down", "left", "right", "play",
         "exit"};
 
-    for (int i = 0; i < hotwords.size(); ++i) {
-        // NOTE: Between 8-9-10 (thought 9 was ideal!).
-        DS_AddHotWord(_ctx, hotwords.at(0), 9.f);
-    }
+    //for (int i = 0; i < hotwords.size(); ++i) {
+    //    // NOTE: Between 8-9-10 (thought 9 was ideal!).
+    //    DS_AddHotWord(_ctx, hotwords.at(0), 9.f);
+    //}
 
     //std::vector<char*> coldwords = {"but", "at", "he", "ah", "the", "put", "bu",
     //    "laughed", "ray", "lalage", "a", "raleigh", "lalala", "la", "lala",
